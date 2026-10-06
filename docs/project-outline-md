@@ -13,7 +13,13 @@ Seven engine tests and four HTTP integration tests cover the current milestone.
 See [the first scenario](first-working-scenario.md) for adopted model decisions
 and [the README](../README.md) for run instructions. The broader phases below
 remain the project plan; their larger example datasets and UI concepts are not
-all implemented. Next: define a second engineering scenario.
+all implemented.
+
+Phases 1–9 are complete for the bounded first scenario. The
+[portfolio case study](portfolio-case-study.md) completes the Phase 10 narrative
+with the implemented model, review behaviour, validation, lessons, and limits.
+The demo meets the finish line below. A second engineering scenario is an
+optional extension.
 
 **Core question:**
 

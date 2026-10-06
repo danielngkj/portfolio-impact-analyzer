@@ -63,8 +63,10 @@ restricted file access. The browser flow has also been checked manually for
 brew and steam results, expandable paths, required input, and clearing old
 results when the form changes.
 
-Next: define a second engineering scenario to exercise the relationship model
-and review policy beyond the brew-temperature example.
+The [portfolio case study](docs/portfolio-case-study.md) completes the Phase 10
+narrative for this bounded demo: problem, model, solution, documentation
+traceability, validation, and lessons learned. A second engineering scenario
+is an optional extension to exercise the model beyond brew temperature.
 
 See [the first scenario](docs/first-working-scenario.md) for the model and
 [the project outline](docs/project-outline-md) for the broader plan.
