@@ -28,7 +28,7 @@ Other artifacts may describe or verify the related behaviour.
 
 Three decisions keep the model small and the results inspectable:
 
-- **Explicit relationships:** nine synthetic entities cover parameters,
+- **Explicit relationships:** 15 synthetic entities cover parameters,
   software, behaviours, requirements, tests, and documentation topics.
   Each connection has a defined meaning, such as `configures` or `verifies`.
 - **Specific documentation targets:** individual topics connect to parameters
@@ -98,9 +98,12 @@ The demo shares one analysis engine across both interfaces:
 - **Python standard library:** graph validation, traversal, command-line
   reporting, and a local server, without third-party dependencies.
 - **HTML, CSS, and JavaScript:** the browser interface calls the Python engine.
-- **11 automated tests:** cover review selection, explanations, API behaviour,
-  and model integrity. Manual browser checks cover both parameter examples,
-  expandable paths, input validation, and clearing old results.
+- **13 automated tests:** cover review selection, explanations, API behaviour,
+  and model integrity, including exact pressure candidates and shared-topic
+  boundaries. Earlier manual browser checks covered brew temperature and steam,
+  expandable paths, input validation, and clearing old results. The
+  [README walkthrough](../README.md#test-the-scenarios-yourself) includes pressure
+  and comparison of the shared documentation paths.
 
 The [README](../README.md) provides run instructions and a test breakdown.
 
@@ -114,12 +117,15 @@ Building the demo highlighted three lessons:
 
 The prototype also has clear limits:
 
-- A small synthetic dataset covers one main engineering scenario.
+- A small synthetic dataset covers temperature and pressure engineering scenarios.
 - Real product data and review-time savings have not been evaluated.
 - Each candidate shows one shortest path; alternatives are omitted.
 - Missing or incorrect relationships can affect the review plan.
 
-A second engineering scenario would test the approach further.
+The [pressure scenario](second-working-scenario.md) tests the same policy with
+a separate pump-control branch. Both branches reach the shared Brew regulation
+specification, with distinct explanation paths. Traversal stops at that topic,
+so its shared connections do not pull the other engineering branch into results.
 The current demo already supports its core task: **change a parameter,
 see what may need review, and understand why.**
 

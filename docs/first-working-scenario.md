@@ -16,8 +16,10 @@ graph connections determine the review candidates, not temperature arithmetic.
 
 ## Smallest useful dataset
 
-Use nine entities across six types. Documentation nodes represent individual
-topics, so the result identifies a specific review target.
+The original scenario uses nine entities across six types, listed below. The
+full dataset now has 15 entities, including the
+[pressure scenario](second-working-scenario.md). Documentation nodes represent
+individual topics, so the result identifies a specific review target.
 
 | ID | Type | Name | Synthetic detail |
 | --- | --- | --- | --- |
@@ -26,14 +28,15 @@ topics, so the result identifies a specific review target.
 | BEH-001 | Behaviour | Brew temperature regulation | Regulates temperature toward the configured target |
 | REQ-001 | Requirement | Brew temperature tracking | Temperature shall track the configured target within ±1°C before brewing |
 | TEST-001 | Test | Brew temperature tracking test | Verifies tracking at the configured target; fixture currently uses 93°C |
-| DOC-001 | DocumentationTopic | Brew regulation specification | Describes temperature regulation and its configured target |
+| DOC-001 | DocumentationTopic | Brew regulation specification | Describes temperature and pressure regulation and their configured targets |
 | DOC-002 | DocumentationTopic | Set brew temperature | References the parameter and currently states a 93°C default |
 | PARAM-002 | Parameter | Steam target temperature | Separate steam setting, 125°C |
 | DOC-003 | DocumentationTopic | Set steam temperature | References only the steam parameter |
 
 The two steam entities provide a negative control: they must stay outside the
-brew-temperature result. Features, hardware components, alerts, and further
-requirements can wait until they have a clear role in a second scenario.
+brew-temperature result. The pressure scenario adds a separate module,
+behaviour, requirement, test, parameter, and setting topic using the same types
+and policy. Features, hardware components, and alerts remain outside the model.
 
 ## Stored relationships
 
@@ -78,7 +81,10 @@ Input: PARAM-001, 93°C → 95°C.
 
 Expected review candidates: one module, one behaviour, one requirement, one
 test, and two documentation topics. The changed parameter is shown separately
-from the six review candidates. PARAM-002 and DOC-003 do not appear.
+from the six review candidates. PARAM-002 and DOC-003 do not appear, nor do
+PARAM-003, MOD-002, BEH-002, REQ-002, TEST-002, or DOC-004. DOC-001 is shared
+with pressure regulation, but traversal stops at the topic and does not follow
+its other connection into the pressure branch.
 
 Every candidate has an inspectable path. For example:
 

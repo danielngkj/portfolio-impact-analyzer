@@ -2,14 +2,14 @@
 
 ### Implementation checkpoint — 6 October 2026
 
-The first brew-temperature scenario is implemented with nine synthetic entities
-across six types, explicit relationship semantics, a bounded traversal policy,
+The first brew-temperature scenario was implemented with nine synthetic
+entities across six types, explicit relationship semantics, a bounded traversal policy,
 and one shortest explanation path per candidate. It includes a command-line
 demo and a local browser interface with a change form, grouped engineering and
 documentation candidates, and expandable paths. The steam branch demonstrates
 that unrelated entities stay outside the brew results.
 
-Seven engine tests and four HTTP integration tests cover the current milestone.
+Nine engine tests and four HTTP integration tests cover the current milestone.
 See [the first scenario](first-working-scenario.md) for adopted model decisions
 and [the README](../README.md) for run instructions. The broader phases below
 remain the project plan; their larger example datasets and UI concepts are not
@@ -18,8 +18,11 @@ all implemented.
 Phases 1–9 are complete for the bounded first scenario. The
 [portfolio case study](portfolio-case-study.md) completes the Phase 10 narrative
 with the implemented model, review behaviour, validation, lessons, and limits.
-The demo meets the finish line below. A second engineering scenario is an
-optional extension.
+The demo meets the finish line below. The [second engineering scenario](second-working-scenario.md) is also
+implemented: brew pressure uses a separate engineering branch and shares one
+documentation topic with temperature regulation. The dataset now has 15 entities
+and 13 relationships across six types. Both engineering scenarios return six
+review candidates; their only shared candidate is the specification topic.
 
 **Core question:**
 

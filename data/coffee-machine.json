@@ -1,22 +1,167 @@
 {
   "entities": [
-    {"id": "PARAM-001", "type": "Parameter", "name": "Brew target temperature", "value": 93, "unit": "°C", "detail": "Configured brew target, currently 93°C"},
-    {"id": "MOD-001", "type": "SoftwareModule", "name": "Temperature controller", "detail": "Uses the target to regulate brew temperature"},
-    {"id": "BEH-001", "type": "Behaviour", "name": "Brew temperature regulation", "detail": "Regulates temperature toward the configured target"},
-    {"id": "REQ-001", "type": "Requirement", "name": "Brew temperature tracking", "detail": "Temperature shall track the configured target within ±1°C before brewing"},
-    {"id": "TEST-001", "type": "Test", "name": "Brew temperature tracking test", "detail": "Verifies tracking at the configured target; fixture currently uses 93°C"},
-    {"id": "DOC-001", "type": "DocumentationTopic", "name": "Brew regulation specification", "detail": "Describes temperature regulation and its configured target"},
-    {"id": "DOC-002", "type": "DocumentationTopic", "name": "Set brew temperature", "detail": "References the parameter and currently states a 93°C default"},
-    {"id": "PARAM-002", "type": "Parameter", "name": "Steam target temperature", "value": 125, "unit": "°C", "detail": "Separate steam setting, currently 125°C"},
-    {"id": "DOC-003", "type": "DocumentationTopic", "name": "Set steam temperature", "detail": "References only the steam parameter"}
+    {
+      "id": "PARAM-001",
+      "type": "Parameter",
+      "name": "Brew target temperature",
+      "value": 93,
+      "unit": "°C",
+      "detail": "Configured brew target, currently 93°C"
+    },
+    {
+      "id": "MOD-001",
+      "type": "SoftwareModule",
+      "name": "Temperature controller",
+      "detail": "Uses the target to regulate brew temperature"
+    },
+    {
+      "id": "BEH-001",
+      "type": "Behaviour",
+      "name": "Brew temperature regulation",
+      "detail": "Regulates temperature toward the configured target"
+    },
+    {
+      "id": "REQ-001",
+      "type": "Requirement",
+      "name": "Brew temperature tracking",
+      "detail": "Temperature shall track the configured target within ±1°C before brewing"
+    },
+    {
+      "id": "TEST-001",
+      "type": "Test",
+      "name": "Brew temperature tracking test",
+      "detail": "Verifies tracking at the configured target; fixture currently uses 93°C"
+    },
+    {
+      "id": "DOC-001",
+      "type": "DocumentationTopic",
+      "name": "Brew regulation specification",
+      "detail": "Describes brew temperature and pressure regulation and their configured targets"
+    },
+    {
+      "id": "DOC-002",
+      "type": "DocumentationTopic",
+      "name": "Set brew temperature",
+      "detail": "References the parameter and currently states a 93°C default"
+    },
+    {
+      "id": "PARAM-002",
+      "type": "Parameter",
+      "name": "Steam target temperature",
+      "value": 125,
+      "unit": "°C",
+      "detail": "Separate steam setting, currently 125°C"
+    },
+    {
+      "id": "DOC-003",
+      "type": "DocumentationTopic",
+      "name": "Set steam temperature",
+      "detail": "References only the steam parameter"
+    },
+    {
+      "id": "PARAM-003",
+      "type": "Parameter",
+      "name": "Brew target pressure",
+      "value": 9,
+      "unit": "bar",
+      "detail": "Configured brew pressure target, currently 9 bar"
+    },
+    {
+      "id": "MOD-002",
+      "type": "SoftwareModule",
+      "name": "Pump controller",
+      "detail": "Uses the pressure target to control the brew pump"
+    },
+    {
+      "id": "BEH-002",
+      "type": "Behaviour",
+      "name": "Brew pressure regulation",
+      "detail": "Regulates brew pressure toward the configured target"
+    },
+    {
+      "id": "REQ-002",
+      "type": "Requirement",
+      "name": "Brew pressure tracking",
+      "detail": "Brew pressure shall track the configured target within ±0.5 bar during extraction"
+    },
+    {
+      "id": "TEST-002",
+      "type": "Test",
+      "name": "Brew pressure tracking test",
+      "detail": "Verifies pressure tracking at the configured target; fixture currently uses 9 bar"
+    },
+    {
+      "id": "DOC-004",
+      "type": "DocumentationTopic",
+      "name": "Set brew pressure",
+      "detail": "References the pressure parameter and currently states a 9 bar default"
+    }
   ],
   "relationships": [
-    {"source": "PARAM-001", "relationship": "configures", "target": "MOD-001"},
-    {"source": "BEH-001", "relationship": "implementedBy", "target": "MOD-001"},
-    {"source": "REQ-001", "relationship": "realizedBy", "target": "BEH-001"},
-    {"source": "TEST-001", "relationship": "verifies", "target": "REQ-001"},
-    {"source": "DOC-001", "relationship": "describes", "target": "BEH-001"},
-    {"source": "DOC-002", "relationship": "references", "target": "PARAM-001"},
-    {"source": "DOC-003", "relationship": "references", "target": "PARAM-002"}
+    {
+      "source": "PARAM-001",
+      "relationship": "configures",
+      "target": "MOD-001"
+    },
+    {
+      "source": "BEH-001",
+      "relationship": "implementedBy",
+      "target": "MOD-001"
+    },
+    {
+      "source": "REQ-001",
+      "relationship": "realizedBy",
+      "target": "BEH-001"
+    },
+    {
+      "source": "TEST-001",
+      "relationship": "verifies",
+      "target": "REQ-001"
+    },
+    {
+      "source": "DOC-001",
+      "relationship": "describes",
+      "target": "BEH-001"
+    },
+    {
+      "source": "DOC-002",
+      "relationship": "references",
+      "target": "PARAM-001"
+    },
+    {
+      "source": "DOC-003",
+      "relationship": "references",
+      "target": "PARAM-002"
+    },
+    {
+      "source": "PARAM-003",
+      "relationship": "configures",
+      "target": "MOD-002"
+    },
+    {
+      "source": "BEH-002",
+      "relationship": "implementedBy",
+      "target": "MOD-002"
+    },
+    {
+      "source": "REQ-002",
+      "relationship": "realizedBy",
+      "target": "BEH-002"
+    },
+    {
+      "source": "TEST-002",
+      "relationship": "verifies",
+      "target": "REQ-002"
+    },
+    {
+      "source": "DOC-001",
+      "relationship": "describes",
+      "target": "BEH-002"
+    },
+    {
+      "source": "DOC-004",
+      "relationship": "references",
+      "target": "PARAM-003"
+    }
   ]
 }

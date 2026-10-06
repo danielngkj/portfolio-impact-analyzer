@@ -39,7 +39,7 @@ class WebTests(unittest.TestCase):
     def test_api_matches_engine_and_preserves_dataset(self):
         original = DATA_PATH.read_bytes()
         graph = json.loads(original)
-        for entity, proposed in [("PARAM-001", 95), ("PARAM-002", 126), ("PARAM-001", 94.5)]:
+        for entity, proposed in [("PARAM-001", 95), ("PARAM-002", 126), ("PARAM-003", 10), ("PARAM-001", 94.5)]:
             with self.subTest(entity=entity, proposed=proposed):
                 status, headers, body = self.get(f"/api/analyze?entity={entity}&proposed={proposed}")
                 self.assertEqual(status, 200)

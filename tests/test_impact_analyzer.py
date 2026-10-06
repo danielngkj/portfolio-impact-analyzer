@@ -40,6 +40,44 @@ class ImpactTests(unittest.TestCase):
         result = analyze(self.graph, "PARAM-002", 126)
         self.assertEqual([item["entity"]["id"] for item in result["candidates"]], ["DOC-003"])
 
+    def test_pressure_candidates_and_explanation_evidence(self):
+        original = copy.deepcopy(self.graph)
+        result = analyze(self.graph, "PARAM-003", 10)
+        candidates = {item["entity"]["id"]: item for item in result["candidates"]}
+        self.assertEqual(set(candidates), {"MOD-002", "BEH-002", "REQ-002", "TEST-002", "DOC-001", "DOC-004"})
+        self.assertEqual(result["change"]["current_value"], 9)
+        self.assertEqual(result["change"]["proposed_value"], 10)
+        self.assertEqual(result["change"]["unit"], "bar")
+        self.assertEqual([step["to"] for step in candidates["TEST-002"]["path"]],
+                         ["MOD-002", "BEH-002", "REQ-002", "TEST-002"])
+        self.assertEqual(len(candidates["DOC-004"]["path"]), 1)
+        for entity_id, candidate in candidates.items():
+            current = "PARAM-003"
+            for step in candidate["path"]:
+                self.assertEqual(step["from"], current)
+                edge = step["stored_edge"]
+                self.assertIn(edge, self.graph["relationships"])
+                expected = (edge["source"], edge["target"]) if step["direction"] == "outgoing" else (edge["target"], edge["source"])
+                self.assertEqual((step["from"], step["to"]), expected)
+                current = step["to"]
+            self.assertEqual(current, entity_id)
+        self.assertEqual(result["candidates"], analyze(self.graph, "PARAM-003", 9.5)["candidates"])
+        self.assertEqual(self.graph, original)
+
+    def test_shared_document_does_not_bridge_engineering_branches(self):
+        reports = [analyze(self.graph, entity, proposed) for entity, proposed in
+                   [("PARAM-001", 95), ("PARAM-003", 10)]]
+        candidate_maps = [{item["entity"]["id"]: item for item in report["candidates"]}
+                          for report in reports]
+        self.assertEqual(set(candidate_maps[0]) & set(candidate_maps[1]), {"DOC-001"})
+        for candidates, behaviour in zip(candidate_maps, ["BEH-001", "BEH-002"]):
+            path = candidates["DOC-001"]["path"]
+            self.assertEqual(len(path), 3)
+            self.assertEqual(path[-1]["stored_edge"],
+                             {"source": "DOC-001", "relationship": "describes", "target": behaviour})
+            self.assertEqual(path[-1]["direction"], "incoming")
+            self.assertFalse(any(item["entity"]["type"] == "Parameter" for item in candidates.values()))
+
     def test_shared_module_does_not_pull_in_other_parameters(self):
         self.graph["relationships"].append({"source": "PARAM-002", "relationship": "configures", "target": "MOD-001"})
         ids = {item["entity"]["id"] for item in analyze(self.graph, "PARAM-001", 95)["candidates"]}
