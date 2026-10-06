@@ -1,7 +1,7 @@
 # Portfolio Impact Analyzer
 
 I built a tool that turns a proposed engineering change into an explainable
-review plan. It models a fictional industrial coffee machine, connecting
+review plan. It models a fictional industrial coffee machine system, connecting
 configuration parameters to engineering artifacts and documentation topics.
 
 The brew-temperature example shows the workflow:
@@ -10,8 +10,8 @@ The brew-temperature example shows the workflow:
 - **Review:** see four engineering artifacts and two documentation topics.
 - **Explain:** inspect the relationship path behind every candidate.
 
-The diagram shows the allowed review paths. Its labels describe traversal;
-stored relationships may point in the opposite direction.
+The diagram shows the review paths. Labels describe traversal;
+stored relationships can point in the opposite direction.
 
 ![Review paths: configuration parameter → software module → behaviour → requirement → test, with documentation branches from the parameter and behaviour.](assets/review-paths.svg)
 
@@ -20,8 +20,8 @@ stored relationships may point in the opposite direction.
 **If something changes, what artifacts might be affected?**
 
 Product knowledge is spread across engineering artifacts and documentation.
-Engineers and technical writers need specific review targets, with reasons
-for selecting them. A parameter mention reveals a direct connection.
+Engineers and technical writers need specific review targets, and reasons
+for selecting them. A parameter reference reveals a direct connection.
 Other artifacts may describe or verify the related behaviour.
 
 ## Modelling the connections
