@@ -1,0 +1,342 @@
+## Project 3 — System Impact Analyzer
+
+**Core question:**
+
+> **When one thing in a complex product changes, what else might require review?**
+
+**Domain:** fictional industrial coffee machine.
+
+**Primary demonstration:** ontology + knowledge graph + relationship traversal + technical-documentation impact analysis.
+
+**Not:** another chatbot, search engine, repository cleanup tool, or engineering simulator.
+
+### Project plan
+
+| Phase | What we do | What you learn | Deliverable |
+|---|---|---|---|
+| **1. Define the problem** | Establish user, use case and boundaries | Why a KG is appropriate | 1-page problem statement |
+| **2. Model the system** | Identify things that exist in our coffee-machine world | **Entities/classes** | Initial domain model |
+| **3. Define relationships** | Decide how those things connect | **Ontology / semantics** | Relationship model |
+| **4. Create synthetic data** | Invent requirements, behaviours, modules, components, parameters, tests and docs | **Instances / graph data** | Small synthetic dataset |
+| **5. Build the graph** | Convert entities + relationships into connected data | **Nodes, edges, triples** | Working knowledge graph |
+| **6. Build impact traversal** | Start from a changed entity and follow relevant relationships | **Graph traversal** | Impact-analysis engine |
+| **7. Add documentation impact** | Connect engineering entities to documentation topics | **Traceability** | Docs requiring review + reasons |
+| **8. Build UI** | Let someone select/change an entity and inspect impact | Communicating graph reasoning | Portfolio interface |
+| **9. Explainability** | Show *why* each item was surfaced | Trust / graph provenance | Relationship paths |
+| **10. Portfolio narrative** | Explain problem → model → solution → learning | Knowledge-engineering storytelling | Case study |
+
+### Phase 1 — Define the problem
+
+Before touching code, we define something like:
+
+**User:** systems engineer / technical writer / knowledge engineer.
+
+**Situation:** An engineering change is proposed to an industrial coffee machine.
+
+**Problem:** Product knowledge is distributed across requirements, behaviours, components, software, parameters, tests and documentation. It's difficult to understand the possible downstream impact of changing one item.
+
+**Goal:** Use explicitly modelled relationships to identify connected artifacts requiring review.
+
+That prevents scope creep.
+
+---
+
+## Phase 2 — Model our coffee-machine world
+
+We probably need only around **8–10 entity types** initially.
+
+For example:
+
+`Feature`  
+`Requirement`  
+`Behaviour`  
+`Software Module`  
+`Hardware Component`  
+`Parameter`  
+`Test`  
+`Document`  
+`Alert`
+
+Then you'll learn an important ontology skill:
+
+> **What deserves to be a thing?**
+
+We won't let AI decide all of these for you. We'll discuss questionable cases.
+
+---
+
+## Phase 3 — Define relationships
+
+This is the heart of Project 3.
+
+For example:
+
+`Feature → definedBy → Requirement`
+
+`Requirement → realizedBy → Behaviour`
+
+`Behaviour → dependsOn → Component`
+
+`Behaviour → implementedBy → Module`
+
+`Parameter → configures → Module`
+
+`Test → verifies → Requirement`
+
+`Document → describes → Behaviour`
+
+`Alert → indicates → Condition`
+
+Now you'll learn the distinction between merely drawing lines and giving those lines **semantic meaning**.
+
+This is where we actually learn ontology thinking.
+
+---
+
+## Phase 4 — Create a small synthetic system
+
+**Small.**
+
+We do **not** repeat Whoosh's 8,000-record exercise. That was appropriate for demonstrating repository analytics. 
+
+Something like **40–80 entities** may be plenty.
+
+Maybe:
+
+> 5 features  
+> 10 requirements  
+> 8 behaviours  
+> 6 modules  
+> 8 hardware components  
+> 10 parameters  
+> 10 tests  
+> 10 documents
+
+The exact numbers aren't important.
+
+**Relationship quality matters much more than volume.**
+
+---
+
+## Phase 5 — Build the actual graph
+
+Then:
+
+**Entity + relationship + entity**
+
+becomes graph data.
+
+For example:
+
+`BrewTemperatureControl → dependsOn → BrewBoiler`
+
+`BrewTemperatureControl → implementedBy → TemperatureController`
+
+`BrewTargetTemperature → configures → TemperatureController`
+
+At this stage we'll decide whether a lightweight graph representation is enough or whether using something such as a graph database adds genuine learning value.
+
+**Technology follows the model, not the other way around.**
+
+---
+
+## Phase 6 — Build the impact engine
+
+This is the payoff.
+
+User selects:
+
+> **Brew target temperature**
+
+and proposes:
+
+> `93°C → 95°C`
+
+The system traverses outward:
+
+**Parameter**
+
+→ Module  
+→ Behaviour  
+→ Requirement  
+→ Test  
+→ Documentation
+
+and produces:
+
+> **Potential impact**
+>
+> 3 behaviours  
+> 2 requirements  
+> 4 tests  
+> 3 documentation topics
+
+But critically, clicking an affected item shows:
+
+**WHY?**
+
+For example:
+
+> Brew Target Temperature  
+> → configures Temperature Controller  
+> → implements Brew Temperature Regulation  
+> → satisfies REQ-014  
+> → verified by TEST-008
+
+That's what makes the result defensible.
+
+---
+
+## Phase 7 — Make it relevant to technical communication
+
+This is where I want your version to distinguish itself.
+
+Add:
+
+### Documentation Impact
+
+For every engineering change:
+
+> **Which documentation should be reviewed, and why?**
+
+For example:
+
+**Brew System Specification**  
+Directly describes affected behaviour.
+
+**Temperature Troubleshooting Guide**  
+References thresholds associated with changed parameter.
+
+**Maintenance Verification Procedure**  
+Contains temperature validation step.
+
+Then possibly:
+
+### Generate change brief
+
+The application creates structured context:
+
+> **Change:** Brew target temperature 93 → 95°C  
+> **Affected behaviour:** Brew Temperature Regulation  
+> **Requirements requiring review:** REQ-014, REQ-021  
+> **Tests requiring review:** TEST-008  
+> **Documentation requiring review:** DOC-003, DOC-014  
+> **Reason:** Relationship path…
+
+That could later feed an LLM, but **AI isn't the main trick here**.
+
+The graph is.
+
+---
+
+## Phase 8 — UI
+
+I'd keep it restrained.
+
+Something like:
+
+**LEFT**
+
+Change an entity:
+
+`Brew Target Temperature`
+
+**CENTRE**
+
+Impact map:
+
+`Parameter → Module → Behaviour → Requirement → Test`
+
+**RIGHT**
+
+Impact summary:
+
+> Requirements: 2  
+> Tests: 4  
+> Documentation: 3  
+> Components: 2
+
+Click anything and see:
+
+> **Why is this affected?**
+
+Then show the relationship path.
+
+That would be far more useful than throwing a gigantic force-directed graph at the recruiter.
+
+---
+
+## Phase 9 — Explainability
+
+This may actually become one of the strongest pieces of the project.
+
+The analyzer shouldn't merely say:
+
+> `DOC-027 affected`
+
+It should say:
+
+> **DOC-027 potentially requires review because:**
+>
+> BrewTargetTemperature  
+> → configures → TemperatureController  
+> → implements → BrewTemperatureRegulation  
+> → describedBy → DOC-027
+
+The user can inspect the reasoning.
+
+That demonstrates that you understand **traceability**, not just graph visualization.
+
+---
+
+## Phase 10 — Portfolio case study
+
+The final narrative could be very simple:
+
+**Problem**
+
+Engineering changes propagate through interconnected systems, but their downstream effects can be difficult to identify.
+
+**Approach**
+
+I modelled a fictional industrial coffee machine as connected requirements, behaviours, components, software, configuration parameters, tests and documentation.
+
+**Solution**
+
+A relationship-driven impact analyzer traces potential downstream effects of a proposed change.
+
+**Technical communication angle**
+
+The system identifies documentation potentially requiring review and explains the relationship path that caused it to be surfaced.
+
+**Learning**
+
+Ontology design, knowledge graphs, graph traversal, traceability, impact analysis and explainable knowledge systems.
+
+---
+
+### And importantly: the finish line
+
+We stop when the demo can convincingly do this:
+
+> **Change one parameter.**
+
+↓
+
+> **Show me what might be affected.**
+
+↓
+
+> **Show me why.**
+
+↓
+
+> **Tell me which documentation might need review.**
+
+That's enough.
+
+No digital twin. No physics simulation. No giant ontology. No autonomous vehicle. No enterprise requirements-management platform. No need to turn the coffee machine into a perfect engineering model.
+
+**The portfolio project exists to demonstrate relationship thinking.**
+
+And I would start **Phase 1–3 with you before writing any code**. That's actually where most of your ontology learning is going to happen.

@@ -1,0 +1,22 @@
+{
+  "entities": [
+    {"id": "PARAM-001", "type": "Parameter", "name": "Brew target temperature", "value": 93, "unit": "°C", "detail": "Configured brew target, currently 93°C"},
+    {"id": "MOD-001", "type": "SoftwareModule", "name": "Temperature controller", "detail": "Uses the target to regulate brew temperature"},
+    {"id": "BEH-001", "type": "Behaviour", "name": "Brew temperature regulation", "detail": "Regulates temperature toward the configured target"},
+    {"id": "REQ-001", "type": "Requirement", "name": "Brew temperature tracking", "detail": "Temperature shall track the configured target within ±1°C before brewing"},
+    {"id": "TEST-001", "type": "Test", "name": "Brew temperature tracking test", "detail": "Verifies tracking at the configured target; fixture currently uses 93°C"},
+    {"id": "DOC-001", "type": "DocumentationTopic", "name": "Brew regulation specification", "detail": "Describes temperature regulation and its configured target"},
+    {"id": "DOC-002", "type": "DocumentationTopic", "name": "Set brew temperature", "detail": "References the parameter and currently states a 93°C default"},
+    {"id": "PARAM-002", "type": "Parameter", "name": "Steam target temperature", "value": 125, "unit": "°C", "detail": "Separate steam setting, currently 125°C"},
+    {"id": "DOC-003", "type": "DocumentationTopic", "name": "Set steam temperature", "detail": "References only the steam parameter"}
+  ],
+  "relationships": [
+    {"source": "PARAM-001", "relationship": "configures", "target": "MOD-001"},
+    {"source": "BEH-001", "relationship": "implementedBy", "target": "MOD-001"},
+    {"source": "REQ-001", "relationship": "realizedBy", "target": "BEH-001"},
+    {"source": "TEST-001", "relationship": "verifies", "target": "REQ-001"},
+    {"source": "DOC-001", "relationship": "describes", "target": "BEH-001"},
+    {"source": "DOC-002", "relationship": "references", "target": "PARAM-001"},
+    {"source": "DOC-003", "relationship": "references", "target": "PARAM-002"}
+  ]
+}
