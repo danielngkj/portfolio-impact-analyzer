@@ -1,6 +1,6 @@
 # First working scenario: brew target temperature
 
-Status: model decisions adopted; JSON dataset and command-line milestone implemented.
+Status: model decisions adopted; JSON dataset, command-line demo, and browser interface implemented.
 
 ## Problem and boundary
 
@@ -108,8 +108,8 @@ Verify the exact candidate set, exclusion of the steam branch, and the stored
 edges and directions behind every explanation. Also reject unknown entity IDs
 and invalid relationship endpoints or type combinations.
 
-Once this works, a single-page interface can reuse the same data and engine:
-one change form, grouped results, and an expandable “Why review this?” path.
+The single-page interface now reuses the same data and engine: one change form,
+grouped results, and an expandable “Why review this?” path.
 
 ## Adopted model decisions
 
@@ -120,3 +120,9 @@ claim of engineering causality. These bounded Phase 1–3 decisions are adopted.
 The implementation uses Python's standard library and returns one deterministic
 shortest explanation path per candidate. Run `python3 impact_analyzer.py` from
 the project root; use `--json` to inspect stored edges and traversal directions.
+
+Run `python3 web_server.py` and open <http://127.0.0.1:8000> for the browser demo.
+It reuses the Python engine, groups engineering and documentation candidates,
+and provides expandable explanation paths with the stored edges and traversal
+directions. Editing the proposed change clears the previous report. The steam
+parameter remains available as the independent branch example.

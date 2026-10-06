@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio Impact Analyzer</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/">Impact / Analyzer</a><span class="badge">Synthetic coffee-machine model</span></header>
+  <main>
+    <div class="intro"><p class="eyebrow">FROM CHANGE TO REVIEW</p><h1>One change.<br>A clearer review plan.</h1><p>Trace the connections between a proposed parameter change and the engineering artifacts and documentation that may need review.</p></div>
+    <div class="workspace">
+      <aside class="panel">
+        <p class="eyebrow">01 / PROPOSE A CHANGE</p><h2>What’s changing?</h2>
+        <form id="change-form">
+          <label for="entity">Parameter</label><select id="entity" required disabled></select>
+          <p id="parameter-detail" class="muted"></p>
+          <div class="current"><span>Current value</span><strong id="current-value">—</strong></div>
+          <label for="proposed">Proposed value <span id="unit"></span></label>
+          <input id="proposed" type="number" step="any" required disabled>
+          <button id="analyze" type="submit" disabled>Find review candidates <span aria-hidden="true">→</span></button>
+        </form>
+        <p class="note">The proposed value describes your change. Graph connections determine which artifacts are surfaced; the dataset stays unchanged.</p>
+      </aside>
+      <section class="results" aria-label="Analysis results" aria-busy="true">
+        <p id="status" role="status" aria-live="polite">Loading the model…</p>
+        <p id="error" role="alert" hidden></p>
+        <div id="report" hidden>
+          <p class="eyebrow">02 / REVIEW THE CONNECTIONS</p><h2 id="change-title"></h2><p id="change-values" class="change-values"></p>
+          <div id="counts" class="counts"></div>
+          <p class="boundary">These are potential review candidates. Connections do not predict physical outcomes or prove that an artifact must change.</p>
+          <section><div class="group-heading"><h3>Engineering review</h3><span id="engineering-count"></span></div><div id="engineering"></div></section>
+          <section><div class="group-heading"><h3>Documentation review</h3><span id="documentation-count"></span></div><div id="documentation"></div></section>
+        </div>
+      </section>
+    </div>
+    <footer>Explicit relationships. Inspectable paths. <span>All data is synthetic.</span></footer>
+  </main>
+</body>
+</html>
