@@ -1,12 +1,12 @@
 # Second working scenario: brew target pressure
 
-Status: implemented in the dataset, command-line demo, and browser interface.
+The JSON model, reference CLI, and browser interface support this scenario.
 All values and engineering details are synthetic.
 
 ## Proposed change
 
-Raise the brew target pressure from **9 bar to 10 bar**. The review policy and
-relationship semantics are unchanged from the temperature scenario.
+Raise the brew target pressure from **9 bar to 10 bar**. Apply the temperature
+scenario’s review policy and relationship meanings.
 
 | ID | Type | Name | Review context |
 | --- | --- | --- | --- |
@@ -18,7 +18,7 @@ relationship semantics are unchanged from the temperature scenario.
 | DOC-004 | DocumentationTopic | Set brew pressure | Currently states a 9 bar default |
 | DOC-001 | DocumentationTopic | Brew regulation specification | Shared topic describing temperature and pressure regulation |
 
-Six entities are new; DOC-001 already exists. The full dataset now contains
+This scenario adds six entities and reuses DOC-001. The full dataset now contains
 15 entities across the same six types.
 
 ## Stored relationships
@@ -41,8 +41,8 @@ The tracking test has this explanation:
 ## Shared documentation and review boundaries
 
 The pressure change returns **six candidates**: four engineering artifacts and
-two documentation topics. Set brew pressure is connected directly to the
-parameter. Brew regulation specification is reached through the pump controller
+two documentation topics. The parameter connects directly to Set brew pressure.
+The analyzer reaches Brew regulation specification through the pump controller
 and pressure behaviour.
 
 Temperature and pressure results overlap only at DOC-001. Each scenario shows
@@ -63,10 +63,11 @@ python3 impact_analyzer.py --entity PARAM-003 --proposed 10 --json
 python3 -m unittest discover -s tests -v
 ```
 
-In the browser, select **Brew target pressure**. The form shows 9 bar as the
+In the browser, choose **Parameter change**, then **Brew target pressure**. The form shows 9 bar as the
 current value and suggests 10 bar. Run the analysis and expand the shared
 specification's explanation to inspect the pressure-specific stored edges.
 
 Engine tests verify exact candidates, path evidence, shared-topic boundaries,
 value-independent selection, and dataset preservation. HTTP tests include the
-pressure request and check parity with the same engine.
+pressure request and check parity with the Python engine. Browser parity tests
+compare complete JavaScript results against that reference.

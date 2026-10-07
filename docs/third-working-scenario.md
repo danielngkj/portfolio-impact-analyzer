@@ -1,14 +1,13 @@
 # Third working scenario: brew readiness behaviour
 
-Status: implemented in the engine, command-line demo, API, and browser.
+The browser engine, Python reference CLI, and optional local API support this scenario.
 All engineering details are synthetic.
 
 Current behaviour: brewing starts once temperature reaches the configured target.
 Proposed behaviour: temperature must stay within ±1°C of the configured target
 for five continuous seconds before brewing starts.
 
-The change starts at BEH-001 rather than a parameter. Four review candidates
-are returned:
+Start the change at BEH-001. The analyzer returns four review candidates:
 
 | Candidate | Review focus | Explanation path |
 | --- | --- | --- |
@@ -17,7 +16,7 @@ are returned:
 | TEST-001 Brew temperature tracking test | Early-start prevention, successful readiness, and timer reset | Behaviour → requirement → incoming verifies → test |
 | DOC-001 Brew regulation specification | Explain the revised brewing-start condition | Behaviour → incoming describes → topic |
 
-The changed behaviour is shown separately from candidates. Traversal stops at
+The interface shows the changed behaviour separately from candidates. Traversal stops at
 modules, tests, and documentation. Neither shared implementation nor the
 shared specification pulls in pressure regulation. Parameter settings and
 steam artifacts remain outside the result.
@@ -29,11 +28,11 @@ Switching back to **Parameter change** restores the numeric input.
 
 Run `python3 impact_analyzer.py --entity BEH-001` for the stored proposal, or
 supply `--proposed "Wait ten seconds before brewing."` for custom context.
-The API accepts the description in the URL-encoded `proposed` field.
-Blank descriptions are rejected. Descriptions do not modify the graph or
+The optional local API accepts the description in the URL-encoded `proposed`
+field. Both engines reject blank descriptions. Descriptions do not modify the graph or
 change dependency selection; custom descriptions receive general review
 questions rather than questions authored for the five-second scenario.
 
-Connections identify potential review. Review findings establish actual
-implementation, requirement, test, or documentation changes. This demo does
+Connections identify potential review. Reviewers use statuses and notes to
+record their conclusions about implementation, requirement, test, or documentation changes. This demo does
 not simulate control logic or prove engineering consequences.

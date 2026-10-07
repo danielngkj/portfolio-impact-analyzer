@@ -19,7 +19,8 @@ stored relationships can point in the opposite direction.
 
 **If something changes, what artifacts might be affected?**
 
-Product knowledge is spread across engineering artifacts and documentation.
+Requirements, software modules, tests, and documentation each hold part of the
+product’s design knowledge.
 Engineers and technical writers need specific review targets, and reasons
 for selecting them. A parameter reference reveals a direct connection.
 Other artifacts may describe or verify the related behaviour.
@@ -36,8 +37,8 @@ Three decisions keep the model small and the results inspectable:
 - **Bounded review policy:** the analyzer follows only approved relationships
   and directions. A shared connection alone does not justify inclusion.
 
-Relationship meaning and review policy are separate. The stored relationship
-**behaviour → implementedBy → module** is followed backwards from the module.
+The review policy controls how the analyzer follows stored relationships. It
+follows **behaviour → implementedBy → module** backwards from the module.
 The interface displays that step as **module → implements → behaviour**.
 
 A separate steam-temperature branch checks the policy's boundaries.
@@ -55,9 +56,9 @@ The brew-temperature example returns six candidates:
 
 | Review group | Candidate | Why it appears |
 | --- | --- | --- |
-| Engineering | Temperature controller | Configured by the parameter |
-| Engineering | Brew temperature regulation | Implemented by the controller |
-| Engineering | Brew temperature tracking requirement | Realized by the behaviour |
+| Engineering | Temperature controller | Uses the parameter as its target |
+| Engineering | Brew temperature regulation | The controller implements this behaviour |
+| Engineering | Brew temperature tracking requirement | The behaviour realizes this requirement |
 | Engineering | Brew temperature tracking test | Verifies the requirement |
 | Documentation | Set brew temperature | References the parameter |
 | Documentation | Brew regulation specification | Describes the behaviour |
@@ -96,14 +97,14 @@ filtering changes card visibility without excluding artifacts from the report.
 
 A visible Markdown report updates as statuses and notes change. It contains the
 proposal, analysis timestamp, status summary, findings, and connection paths.
-No change needed items are summarized together, with their notes. A copy icon
+The report groups No change needed items into concise lines with their notes. A copy icon
 makes the report available for a change ticket without downloading a file.
-Enter finishes a note; Shift+Enter inserts a line break. Trailing line breaks
-are trimmed. Findings stay associated with each exact proposal while the page
+Press Enter to finish a note or Shift+Enter to insert a line break. The report
+trims trailing line breaks. Findings stay associated with each exact proposal while the page
 is open and clear on refresh.
 
-The initial centered card reveals fields and moves into a left sidebar after a
-change type is selected. Editing preserves the sidebar layout; clearing the type
+Selecting a change type moves the centered card into a left sidebar and reveals
+the remaining fields. Editing preserves the sidebar layout; clearing the type
 restores the initial card. Form controls fade in sequentially and results reveal
 in groups sized to the viewport, respecting reduced-motion preferences.
 A conditional right-hand table of contents helps
@@ -111,10 +112,10 @@ navigate long reports. The case study uses the same header and footer as the app
 An unchanged value or matching trimmed behaviour description returns zero
 candidates and a No change proposed message.
 
-Review questions are predefined guidance, not generated engineering conclusions.
+The model and engines supply predefined review questions as guidance.
 The stored example uses authored questions; custom descriptions receive general
-questions by artifact type. Candidate selection and explanation paths are computed
-from recorded graph relationships and the traversal policy.
+questions by artifact type. The analyzer computes candidates and explanation
+paths from recorded relationships and the traversal policy.
 
 ## Why documentation matters here
 
@@ -136,7 +137,7 @@ The analyzer leaves the dataset unchanged and does not predict physical outcomes
 
 ## Implementation and validation
 
-The static browser engine is checked against the Python reference:
+Automated tests compare the static browser engine against the Python reference:
 
 - **Python standard library:** graph validation, traversal, command-line
   reporting, and a local server, without third-party dependencies.
@@ -149,7 +150,7 @@ The static browser engine is checked against the Python reference:
   for suggested, custom, unchanged, and shared-module scenarios. A Safari walkthrough
   on 7 October 2026 checked status buttons, filters, note entry, report copying,
   visual paths, text comparison, preserved findings, and unchanged proposals. The
-  [scenario walkthrough](development.md#test-the-scenarios-yourself) includes pressure
+  [verification checklist](development.md#verification-checklist) includes pressure
   and comparison of the shared documentation paths.
 
 The [README](../README.md) provides run instructions and a test breakdown.
@@ -164,12 +165,12 @@ Building the demo highlighted three lessons:
 
 ## Scope and limitations
 
-This is a portfolio learning demo of entities, explicit relationship graphs,
-and explainable review selection. Its scope is a single-user application ready for static hosting
-with a synthetic coffee-machine dataset, numeric parameter changes, and textual
-behaviour changes. It includes review questions, explanation evidence, and
-session-only human findings. Requirements and tests are review targets; they
-cannot currently be selected as change starting points.
+This portfolio demo uses explicit entities and relationships to explain review
+selection. It runs as a single-user application on static hosting and supports
+numeric parameter changes and textual behaviour changes in a synthetic
+coffee-machine model. It includes review questions, explanation evidence, and
+session-only human findings. Reviewers can inspect requirements and tests but
+cannot select them as change starting points.
 
 - **Recorded links determine coverage.** If the tracking test exists but its
   `verifies` relationship is missing, the analyzer omits it. A valid explanation
@@ -180,18 +181,18 @@ cannot currently be selected as change starting points.
 - **Policy deliberately limits traversal.** Shared modules and documentation
   can otherwise connect unrelated branches. The chosen boundaries prevent that
   spread but are review rules, not a complete model of engineering causality.
-- **Only one shortest path is shown.** An artifact reached through multiple
-  valid paths may have additional review reasons the report does not display.
-- **Documentation granularity is a topic.** The shared regulation specification
-  is identified for review; the graph does not locate the affected paragraph.
+- **The analyzer shows one shortest path per candidate.** When multiple valid
+  paths reach an artifact, the report omits the additional paths and review reasons.
+- **The model identifies topics, not paragraphs.** The analyzer selects the shared
+  regulation specification for review but does not locate the affected paragraph.
 - **Validation checks structure, not truth.** Valid types, references, descriptions,
   and values do not establish that relationships are complete or correct.
 - **No physical simulation or measured benefit.** The tool cannot establish
-  feasibility, safety, or real-world consequences. Real product data and
-  review-time savings have not been evaluated.
+  feasibility, safety, or real-world consequences. I have not evaluated the tool
+  with real product data or measured review-time savings.
 - **Findings are temporary.** Refreshing or closing the page clears statuses
-  and notes. Persistence and collaboration are outside
-  this demo's scope. Integration with the separate alerts project is deferred.
+  and notes. The demo does not persist findings or support collaboration.
+  Integration with the separate alerts project remains future work.
 
 The [pressure scenario](second-working-scenario.md) tests the same policy with
 a separate pump-control branch. Both branches reach the shared Brew regulation

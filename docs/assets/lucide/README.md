@@ -2,9 +2,9 @@
 
 Source: https://github.com/lucide-icons/lucide/tree/main/icons
 
-Downloaded 6 October 2026. Original SVGs are retained here.
+This folder preserves the original SVGs downloaded on 6 October 2026.
 The review-paths diagram embeds these icons without external requests.
-See LICENSE for the upstream license and attribution.
+Read [LICENSE](LICENSE) for the upstream license and attribution.
 
 | Artifact | Icon |
 | --- | --- |

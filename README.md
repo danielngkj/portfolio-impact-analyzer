@@ -3,7 +3,7 @@
 An interactive portfolio demo that identifies what may need review when a
 setting or feature behaviour changes. It connects engineering artifacts and
 documentation through an explicit relationship graph, showing why each review
-candidate was selected.
+candidate appears.
 
 For example, raising a coffee machine’s brew target from **93°C to 95°C** finds
 four engineering artifacts and two documentation topics. Each has an inspectable
@@ -38,9 +38,9 @@ python3 -m unittest discover -s tests -v
 ```
 
 The 26 tests cover Python analysis, browser-engine parity, model validation,
-explanation paths, unchanged proposals, and local HTTP behaviour. Python 3.9+
-is required; JavaScript checks use Node or macOS’s built-in JavaScriptCore.
-There are no third-party package dependencies.
+explanation paths, unchanged proposals, and local HTTP behaviour. Run them with
+Python 3.9 or later. JavaScript checks use Node or macOS’s built-in JavaScriptCore;
+the suite uses no third-party packages.
 
 ## Hosting
 
@@ -48,15 +48,14 @@ The build packages the public files in `dist/` for static hosting. For GitHub
 Pages, select **Settings → Pages → Source → GitHub Actions**. The included
 workflow tests and publishes the site on pushes to `main`.
 
-Vercel configuration is also included. See the [deployment instructions](docs/development.md#publish-the-static-demo)
+See the [deployment instructions](docs/development.md#publish-the-static-demo)
 for setup details.
 
 ## Limits
 
 All data is fictional. Recorded links identify potential review, not proven
 engineering consequences or complete coverage. Proposal text does not create
-new dependencies. Review notes and statuses clear when the page is refreshed
-or closed.
+new dependencies. Refreshing or closing the page clears review notes and statuses.
 
 See the [case study’s scope and limitations](docs/portfolio-case-study.md#scope-and-limitations)
 for the model’s boundaries and lessons learned.

@@ -1,6 +1,6 @@
 # First working scenario: brew target temperature
 
-Status: model decisions adopted; JSON dataset, command-line demo, and browser interface implemented.
+The JSON model, reference CLI, and browser interface support this scenario.
 
 ## Problem and boundary
 
@@ -11,8 +11,8 @@ and inspect the relationship that connects each artifact to the change.
 
 The first demo answers one question: what should we review for this change?
 It does not predict physical outcomes or declare that an artifact must change.
-All data is synthetic. The proposed value is recorded as change context;
-graph connections determine the review candidates, not temperature arithmetic.
+All data is synthetic. The analyzer records the proposed value as change context
+and follows graph connections to select review candidates.
 
 ## Smallest useful dataset
 
@@ -70,18 +70,18 @@ For this first scenario, allow these steps:
 5. Behaviour → DocumentationTopic via incoming `describes`.
 6. Parameter → DocumentationTopic via incoming `references`.
 
-Tests and documentation topics terminate a path. Keep visited entity IDs to
-avoid cycles and record the relationship and traversal direction for each step.
-Stored triples remain unchanged; inverse traversal is displayed in readable
-language such as “implements,” “realizes,” and “is verified by.”
+Stop traversal at tests and documentation topics. Track visited entity IDs to
+avoid cycles, and record each step’s relationship and direction. Preserve stored
+triples. Display inverse traversal with readable labels such as “implements,”
+“realizes,” and “is verified by.”
 
 ## Expected demonstration
 
 Input: PARAM-001, 93°C → 95°C.
 
 Expected review candidates: one module, one behaviour, one requirement, one
-test, and two documentation topics. The changed parameter is shown separately
-from the six review candidates. PARAM-002 and DOC-003 do not appear, nor do
+test, and two documentation topics. The interface shows the changed parameter
+separately from the six review candidates. PARAM-002 and DOC-003 do not appear, nor do
 PARAM-003, MOD-002, BEH-002, REQ-002, TEST-002, or DOC-004. DOC-001 is shared
 with pressure regulation, but traversal stops at the topic and does not follow
 its other connection into the pressure branch.
@@ -102,33 +102,22 @@ Documentation review reasons:
 The tracking requirement is a review candidate even though its wording may
 remain valid at 95°C. This distinction is central to the demo.
 
-## Smallest implementation
+## Implementation and verification
 
-Start with a JSON dataset and a deterministic traversal function. A command-line
-demo is sufficient to establish the engine: accept the proposed change, print
-the six review candidates, group documentation separately, and print the path
-for each result. No database, LLM, external service, or graph visualization is
-needed for this milestone.
+The browser loads the JSON dataset and runs validation and traversal in
+JavaScript. The Python reference engine provides the CLI and optional local API.
+Both engines return one deterministic shortest explanation path per candidate.
+They use documentation topics as review units and `references` for direct
+parameter mentions.
 
-Verify the exact candidate set, exclusion of the steam branch, and the stored
-edges and directions behind every explanation. Also reject unknown entity IDs
-and invalid relationship endpoints or type combinations.
+Run `python3 impact_analyzer.py` from the project root. Add `--json` to inspect
+stored edges and traversal directions. For browser setup and tests, follow the
+[development guide](development.md).
 
-The single-page interface now reuses the same data and engine: one change form,
-grouped results, and an expandable “Why review this?” path.
+Verify the exact candidate set, exclusion of unrelated branches, and the stored
+edges and directions behind every explanation. Reject unknown entity IDs and
+invalid relationship endpoints or type combinations.
 
-## Adopted model decisions
-
-Documentation topics are the review unit, `references` captures direct parameter
-mentions, and the traversal policy expresses potential review rather than a
-claim of engineering causality. These bounded Phase 1–3 decisions are adopted.
-
-The implementation uses Python's standard library and returns one deterministic
-shortest explanation path per candidate. Run `python3 impact_analyzer.py` from
-the project root; use `--json` to inspect stored edges and traversal directions.
-
-Run `python3 web_server.py` and open <http://127.0.0.1:8000> for the browser demo.
-It reuses the Python engine, groups engineering and documentation candidates,
-and provides expandable explanation paths with the stored edges and traversal
-directions. Editing the proposed change clears the previous report. The steam
-parameter remains available as the independent branch example.
+In the browser, expand **Show connection path** and **Show relationship evidence**
+to inspect the explanation. Editing the proposal clears the previous report.
+Select the steam parameter to check the independent branch.
