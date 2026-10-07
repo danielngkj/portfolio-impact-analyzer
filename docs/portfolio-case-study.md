@@ -84,8 +84,9 @@ changes to avoid expanding through shared implementations into unrelated behavio
 The browser shows current/proposed descriptions with an optional word-level diff
 using separate Current and Proposed sentences with subtle highlights.
 Lucide icons distinguish artifact types in cards and visual connection paths.
-Backend review questions are shared by browser, API, and CLI. Scenario suggestions
-come from the model through `/api/scenarios`.
+Review questions and traversal rules agree across the browser and Python reference
+engine. The browser derives scenario suggestions directly from the JSON model;
+the optional local server also exposes them through `/api/scenarios`.
 
 Each candidate defaults to Needs change as a demo starting state, not a proven
 engineering conclusion. Three direct icon buttons select Needs change, Needs
@@ -135,14 +136,17 @@ The analyzer leaves the dataset unchanged and does not predict physical outcomes
 
 ## Implementation and validation
 
-The demo shares one analysis engine across both interfaces:
+The static browser engine is checked against the Python reference:
 
 - **Python standard library:** graph validation, traversal, command-line
   reporting, and a local server, without third-party dependencies.
-- **HTML, CSS, and JavaScript:** the browser interface calls the Python engine.
-- **21 automated tests:** cover review selection, explanations, API behaviour,
+- **HTML, CSS, and JavaScript:** the browser loads the public JSON model and runs
+  validation and traversal locally. Static hosting needs no Python or API service.
+- **26 automated tests:** cover review selection, explanations, API behaviour,
   and model integrity, including scenario metadata validation, exact pressure
-  candidates, shared-topic boundaries, and unchanged proposals. A Safari walkthrough
+  candidates, shared-topic boundaries, and unchanged proposals. Browser-engine
+  parity checks compare complete results, including ordered paths and questions,
+  for suggested, custom, unchanged, and shared-module scenarios. A Safari walkthrough
   on 7 October 2026 checked status buttons, filters, note entry, report copying,
   visual paths, text comparison, preserved findings, and unchanged proposals. The
   [README walkthrough](../README.md#test-the-scenarios-yourself) includes pressure
@@ -161,7 +165,7 @@ Building the demo highlighted three lessons:
 ## Scope and limitations
 
 This is a portfolio learning demo of entities, explicit relationship graphs,
-and explainable review selection. Its scope is a local, single-user application
+and explainable review selection. Its scope is a single-user application ready for static hosting
 with a synthetic coffee-machine dataset, numeric parameter changes, and textual
 behaviour changes. It includes review questions, explanation evidence, and
 session-only human findings. Requirements and tests are review targets; they
@@ -186,7 +190,7 @@ cannot currently be selected as change starting points.
   feasibility, safety, or real-world consequences. Real product data and
   review-time savings have not been evaluated.
 - **Findings are temporary.** Refreshing or closing the page clears statuses
-  and notes. Persistence, collaboration, and production hosting are outside
+  and notes. Persistence and collaboration are outside
   this demo's scope. Integration with the separate alerts project is deferred.
 
 The [pressure scenario](second-working-scenario.md) tests the same policy with

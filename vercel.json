@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "sh scripts/build-static.sh",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {"source": "/case-study", "destination": "/case-study/index.html"}
+  ]
+}

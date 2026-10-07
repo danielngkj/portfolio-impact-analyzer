@@ -96,7 +96,7 @@ class WebTests(unittest.TestCase):
         status, _, body = self.get("/api/model")
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(body), json.loads(DATA_PATH.read_text()))
-        for path, content_type in [("/", "text/html"), ("/case-study", "text/html"), ("/case-study.md", "text/markdown"), ("/review-paths.svg", "image/svg+xml"), ("/app.js", "text/javascript"), ("/style.css", "text/css"),
+        for path, content_type in [("/", "text/html"), ("/case-study", "text/html"), ("/case-study.md", "text/markdown"), ("/review-paths.svg", "image/svg+xml"), ("/app.js", "text/javascript"), ("/analyzer.js", "text/javascript"), ("/data/coffee-machine.json", "application/json"), ("/style.css", "text/css"),
                                          *[(f"/icons/{icon}.svg", "image/svg+xml") for icon in
                                            ["sliders-horizontal", "code-xml", "activity", "list-checks", "flask-conical", "file-text"]]]:
             status, headers, body = self.get(path)
@@ -105,7 +105,7 @@ class WebTests(unittest.TestCase):
             self.assertTrue(body)
 
     def test_non_assets_are_not_exposed(self):
-        for path in ["/data/coffee-machine.json", "/.git/config", "/../impact_analyzer.py", "/icons/unknown.svg", "/icons/../../impact_analyzer.py"]:
+        for path in ["/data/private.json", "/.git/config", "/../impact_analyzer.py", "/icons/unknown.svg", "/icons/../../impact_analyzer.py"]:
             status, _, body = self.get(path)
             self.assertEqual(status, 404)
             self.assertEqual(json.loads(body), {"error": "Not found"})

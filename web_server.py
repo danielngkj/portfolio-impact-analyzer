@@ -15,6 +15,8 @@ ASSETS = {
     "/case-study.md": ("../docs/portfolio-case-study.md", "text/markdown; charset=utf-8"),
     "/review-paths.svg": ("review-paths.svg", "image/svg+xml"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/analyzer.js": ("analyzer.js", "text/javascript; charset=utf-8"),
+    "/data/coffee-machine.json": ("../data/coffee-machine.json", "application/json; charset=utf-8"),
     "/style.css": ("style.css", "text/css; charset=utf-8"),
 }
 

@@ -537,10 +537,7 @@ function render(result) {
   document.querySelector('.workspace').classList.add('analysis-started');
   const change = result.change;
   activeStatusFilter = null;
-  // Compare the actual proposal; older running servers may omit has_change.
-  const hasChange = change.kind === 'behaviour'
-    ? change.current_behaviour.trim() !== change.proposed_behaviour.trim()
-    : change.current_value !== change.proposed_value;
+  const hasChange = change.has_change;
   const candidatesForReview = hasChange ? result.candidates : [];
   activeReport = {...result, candidates: candidatesForReview};
   reportTimestamp = new Date().toISOString();
@@ -629,8 +626,7 @@ async function runAnalysis() {
   clearReport('Tracing the review connections…');
   setBusy(true);
   try {
-    const query = new URLSearchParams({entity: $('entity').value, proposed: String(proposed)});
-    render(await request(`/api/analyze?${query}`));
+    render(ImpactAnalyzer.analyze(model, $('entity').value, proposed));
   } catch (error) {
     $('status').textContent = '';
     $('error').textContent = error.message;
@@ -668,7 +664,8 @@ $('proposed').addEventListener('input', () => clearReport('Proposed value change
 
 async function initialize() {
   try {
-    const [graph, catalog] = await Promise.all([request('/api/model'), request('/api/scenarios')]);
+    const graph = await request('/data/coffee-machine.json');
+    const catalog = ImpactAnalyzer.supportedScenarios(graph);
     model = graph;
     scenarios = Object.fromEntries(catalog.scenarios.map((item) => [item.entity_id, item]));
     entities = Object.fromEntries(model.entities.map((item) => [item.id, item]));

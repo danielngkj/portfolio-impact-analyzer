@@ -9,7 +9,9 @@ All data is synthetic.
 
 ## Run the demo
 
-Python 3.9 or newer is sufficient; there are no third-party dependencies.
+The public browser demo is static HTML, CSS, JavaScript, and JSON. It needs no
+Python runtime, API service, database, or frontend framework. Python 3.9 or newer
+is used only for the reference CLI and optional local development server.
 
 ```sh
 python3 impact_analyzer.py
@@ -18,6 +20,9 @@ python3 impact_analyzer.py --entity PARAM-003 --proposed 10
 python3 impact_analyzer.py --entity BEH-001
 python3 -m unittest discover -s tests -v
 ```
+
+The browser-engine parity tests use Node, or the built-in JavaScriptCore runtime
+on macOS. Install Node when running the full test suite on Linux or Windows.
 
 ## Open the browser interface
 
@@ -44,9 +49,32 @@ and adapts to a link row on smaller screens.
 
 Changing the form clears the previous report until you run the analysis again.
 The steam example returns only its directly connected documentation topic.
-The local server calls the same Python engine as the command-line demo and
-requires no third-party dependencies.
-The server listens only on `127.0.0.1`; this milestone is a local demo.
+The browser loads `/data/coffee-machine.json` and runs `web/analyzer.js` locally.
+It makes no analysis API requests. The optional local server listens only on
+`127.0.0.1` and retains its Python API for reference checks.
+
+## Publish the static demo
+
+```sh
+sh scripts/build-static.sh
+```
+
+This copies only public assets into `dist/`, including the model, browser engine,
+case-study page, and original case-study document. No Python or npm dependencies
+are needed for the build or hosting. To preview the actual static output locally:
+
+```sh
+python3 -m http.server 8000 --bind 127.0.0.1 --directory dist
+```
+
+Python in this command is just an optional file server, not the analyzer.
+
+For Vercel, import the GitHub repository and choose the **Other** framework preset.
+The checked-in `vercel.json` sets `sh scripts/build-static.sh` as the build command
+and `dist` as the output directory, with a route for `/case-study`. No Functions
+are required. Verify the generated deployment URL, then optionally connect a
+subdomain such as `impact.danielng.co` and link to it from the portfolio.
+Render static hosting can use the same build command and publish directory.
 
 The default demo returns six candidates: one software module, one behaviour,
 one requirement, one test, and two documentation topics. The steam-temperature
@@ -95,11 +123,12 @@ do not affect traversal or overwrite the dataset.
 ## Current status
 
 The JSON graph, validation, deterministic traversal, command-line report,
-browser interface, and automated engine and HTTP checks are implemented.
+static browser interface, and automated engine, JavaScript parity, and HTTP checks are implemented.
 All three engineering scenarios support a complete change → review → explanation
 demo. The dataset contains 15 entities and 13 relationships across six types.
 
-Validation includes fourteen engine tests and seven HTTP integration tests covering
+Validation includes fourteen Python engine tests, five browser-engine parity tests,
+and seven HTTP integration tests covering
 API parity with the engine, invalid requests, model and asset serving, and
 restricted file access. The browser flow has also been checked manually for
 brew and steam results, expandable paths, required input, and clearing old
@@ -135,11 +164,13 @@ each artifact type. All 21 engine and HTTP tests pass.
 
 See [the third scenario](docs/third-working-scenario.md) for details.
 
-## Backend scenario catalog
+## Scenario catalog and reference API
 
 `GET /api/scenarios` returns supported change scenarios with `entity_id`,
 `kind`, `current`, and `proposed`, plus `unit` for parameters. Suggestions are
-stored in the model and used by both the browser and CLI. For example,
+stored in the model and used by both the browser and CLI. The static browser
+derives this catalog locally using `ImpactAnalyzer.supportedScenarios`; the API
+is retained only in the optional local Python server. For example,
 `python3 impact_analyzer.py --entity PARAM-003` now defaults to 10 bar.
 Pressure behaviour also includes a suggested three-second ramp proposal.
 
@@ -202,12 +233,12 @@ Use **Case study** in the header for the browser-readable narrative. The footer'
 
 ## Portfolio scope
 
-This local, single-user learning demo illustrates explicit entities and
+This single-user learning demo illustrates explicit entities and
 relationships, bounded graph traversal, and explainable review candidates.
 It supports parameter and behaviour changes with temporary review findings.
 It does not infer dependencies from free text, simulate engineering outcomes,
 or guarantee complete coverage. Requirements are review targets rather than
-change inputs; persistence, collaboration, production hosting, and alerts-project
+change inputs; persistence, collaboration, and alerts-project
 integration are deferred. The [case study](docs/portfolio-case-study.md) explains
 these boundaries with examples and is available at `/case-study` in the browser.
 
@@ -226,3 +257,9 @@ finishing a note hides its card under an active filter. CSS is grouped by compon
 with responsive variants together; obsolete heading, dropdown, and graph styles
 were removed. These browser checks complement the 21 engine/HTTP tests rather
 than replacing them.
+
+The static build was also checked in Safari: local JavaScript analysis returned
+six temperature candidates and four behaviour candidates, an unchanged numeric
+proposal returned none, and notes, status filters, the text diff, and report
+copying worked through a plain file server. Automated parity tests additionally
+cover unchanged behaviour proposals and verify the public build contents.

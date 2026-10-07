@@ -42,12 +42,12 @@
       <p><strong>Set brew temperature</strong> directly references the parameter and states its current default. <strong>Brew regulation specification</strong> is reached indirectly because it describes the related behaviour. These connections identify different reasons to review content.</p>
       <p><strong>A connection warrants review; it does not prove an artifact must change.</strong> A requirement stated relative to the configured target may still be valid at 95°C.</p>
       <h2>Implementation and validation</h2>
-      <p>One Python standard-library engine serves the browser, API, and command-line interface. The browser uses plain HTML, CSS, JavaScript, and local Lucide icons. The graph and supported scenario suggestions are stored as JSON; review questions come from the backend.</p>
-      <p>Automated engine and HTTP checks cover exact candidate sets, stored relationship evidence, separate engineering branches, metadata validation, API consistency, dataset preservation, and unchanged proposals. An unchanged value or matching behaviour description returns no candidates. Browser checks and JavaScript checks have also exercised the interface, visual paths, and text comparison.</p>
+      <p>The browser uses plain HTML, CSS, JavaScript, and local Lucide icons. It loads the public JSON model and runs validation and graph traversal locally, so hosting needs no Python server, API, or database. Python remains the reference engine for the command-line interface and optional local API. Scenario suggestions and authored review questions are stored in the model.</p>
+      <p>Automated Python, JavaScript parity, and HTTP checks cover exact candidate sets, stored relationship evidence, separate engineering branches, metadata validation, API consistency, dataset preservation, and unchanged proposals. Complete browser results are compared against the Python reference, including custom proposals and shared-module boundaries. An unchanged value or matching behaviour description returns no candidates. Browser checks have also exercised the interface, visual paths, and text comparison.</p>
       <h2>Lessons and limits</h2>
       <ul><li>Define relationship meanings before selecting traversal rules.</li><li>Keep explanation evidence available for reviewers.</li><li>Use documentation topics to make review targets specific.</li></ul>
       <h2>Scope</h2>
-      <p>This portfolio learning demo explores entities, explicit relationship graphs, and explainable review selection in a local, single-user application. It supports numeric parameter changes and textual behaviour changes in a synthetic coffee-machine model. Requirements and tests are review targets; they cannot currently be selected as change starting points.</p>
+      <p>This portfolio learning demo explores entities, explicit relationship graphs, and explainable review selection in a single-user application ready for static hosting. It supports numeric parameter changes and textual behaviour changes in a synthetic coffee-machine model. Requirements and tests are review targets; they cannot currently be selected as change starting points.</p>
       <h2>Graph limitations</h2>
       <ul>
         <li><strong>Recorded links determine coverage.</strong> If the tracking test exists but its “verifies” relationship is missing, the analyzer omits it. An explanation proves a recorded path exists, not that the review list is complete.</li>
@@ -57,7 +57,7 @@
         <li><strong>Topics, not paragraphs.</strong> The shared specification is identified for review, but the graph does not locate the affected passage.</li>
         <li><strong>Structural validation is not factual validation.</strong> Correct types and references do not establish complete or accurate relationships.</li>
       </ul>
-      <p>The tool does not simulate physical outcomes or establish feasibility or safety. Real product data and review-time savings have not been evaluated. Findings are temporary and clear when the page refreshes or closes. Saving reviews, collaboration, production hosting, requirement-change inputs, and integration with the separate alerts project are outside the current demo scope.</p>
+      <p>The tool does not simulate physical outcomes or establish feasibility or safety. Real product data and review-time savings have not been evaluated. Findings are temporary and clear when the page refreshes or closes. Saving reviews, collaboration, requirement-change inputs, and integration with the separate alerts project are outside the current demo scope.</p>
       <h2>Try it</h2>
       <p><a href="/">Open Impact Analyzer</a> to explore setting and behaviour changes. <a href="/case-study.md">Read the original case-study document</a> for the project narrative and source-document references.</p>
     </article>
