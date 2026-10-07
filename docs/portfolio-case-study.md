@@ -1,8 +1,8 @@
-# Portfolio Impact Analyzer
+# Impact Analyzer
 
 I built a tool that turns a proposed engineering change into an explainable
 review plan. It models a fictional industrial coffee machine system, connecting
-configuration parameters to engineering artifacts and documentation topics.
+configuration parameters and behaviours to engineering artifacts and documentation topics.
 
 The brew-temperature example shows the workflow:
 
@@ -47,9 +47,9 @@ Its parameter and documentation topic stay outside the brew result.
 
 The browser workflow has three steps:
 
-1. Select a parameter and enter a proposed value.
+1. Select a parameter or behaviour and enter a proposed value or description.
 2. Review the engineering and documentation groups.
-3. Expand **Why review this?** to inspect the explanation.
+3. Expand **Show connection path** to inspect the explanation.
 
 The brew-temperature example returns six candidates:
 
@@ -73,6 +73,25 @@ The engine uses breadth-first traversal and records visited entities.
 It returns one deterministic shortest path per candidate.
 Paths stop at tests and documentation topics.
 
+## Behaviour changes and review findings
+
+The [behaviour scenario](third-working-scenario.md) changes brew readiness from
+reaching the configured temperature to staying within ±1°C for five continuous
+seconds. Starting at the behaviour returns its implementing module, requirement,
+verifying test, and documentation topic. Modules terminate traversal for behaviour
+changes to avoid expanding through shared implementations into unrelated behaviours.
+
+The browser shows current/proposed descriptions with an optional word-level diff.
+Lucide icons distinguish artifact types in cards and visual connection paths.
+Backend review questions are shared by browser, API, and CLI. Scenario suggestions
+come from the model through `/api/scenarios`.
+
+Each candidate starts Unreviewed. A reviewer can record Needs investigation,
+Needs change, or No change needed and an optional note. These human findings are
+separate from the graph's suggestions and remain available per proposal while
+the page is open. An unchanged value or matching trimmed behaviour description
+returns zero candidates and a No change proposed message.
+
 ## Why documentation matters here
 
 The two documentation candidates illustrate different review reasons:
@@ -88,7 +107,7 @@ must change.** The tracking requirement illustrates this distinction.
 It defines performance relative to the configured target, so its wording
 may still apply at 95°C. Its connection still warrants review.
 
-Proposed values provide context; the graph and policy select the candidates.
+Proposed values and descriptions provide context; the graph and policy select the candidates.
 The analyzer leaves the dataset unchanged and does not predict physical outcomes.
 
 ## Implementation and validation
@@ -98,9 +117,9 @@ The demo shares one analysis engine across both interfaces:
 - **Python standard library:** graph validation, traversal, command-line
   reporting, and a local server, without third-party dependencies.
 - **HTML, CSS, and JavaScript:** the browser interface calls the Python engine.
-- **13 automated tests:** cover review selection, explanations, API behaviour,
-  and model integrity, including exact pressure candidates and shared-topic
-  boundaries. Earlier manual browser checks covered brew temperature and steam,
+- **21 automated tests:** cover review selection, explanations, API behaviour,
+  and model integrity, including scenario metadata validation, exact pressure
+  candidates, shared-topic boundaries, and unchanged proposals. Earlier manual browser checks covered brew temperature and steam,
   expandable paths, input validation, and clearing old results. The
   [README walkthrough](../README.md#test-the-scenarios-yourself) includes pressure
   and comparison of the shared documentation paths.
@@ -115,18 +134,42 @@ Building the demo highlighted three lessons:
 - Preserve evidence so users can assess each explanation.
 - Model documentation topics to make review targets specific.
 
-The prototype also has clear limits:
+## Scope and limitations
 
-- A small synthetic dataset covers temperature and pressure engineering scenarios.
-- Real product data and review-time savings have not been evaluated.
-- Each candidate shows one shortest path; alternatives are omitted.
-- Missing or incorrect relationships can affect the review plan.
+This is a portfolio learning demo of entities, explicit relationship graphs,
+and explainable review selection. Its scope is a local, single-user application
+with a synthetic coffee-machine dataset, numeric parameter changes, and textual
+behaviour changes. It includes review questions, explanation evidence, and
+session-only human findings. Requirements and tests are review targets; they
+cannot currently be selected as change starting points.
+
+- **Recorded links determine coverage.** If the tracking test exists but its
+  `verifies` relationship is missing, the analyzer omits it. A valid explanation
+  proves that a recorded path exists, not that the candidate list is complete.
+- **Proposal text does not create dependencies.** A description mentioning pump
+  control does not add a connection to the pump controller. Semantic interpretation
+  of free text is outside scope. The diff shows wording changes only.
+- **Policy deliberately limits traversal.** Shared modules and documentation
+  can otherwise connect unrelated branches. The chosen boundaries prevent that
+  spread but are review rules, not a complete model of engineering causality.
+- **Only one shortest path is shown.** An artifact reached through multiple
+  valid paths may have additional review reasons the report does not display.
+- **Documentation granularity is a topic.** The shared regulation specification
+  is identified for review; the graph does not locate the affected paragraph.
+- **Validation checks structure, not truth.** Valid types, references, descriptions,
+  and values do not establish that relationships are complete or correct.
+- **No physical simulation or measured benefit.** The tool cannot establish
+  feasibility, safety, or real-world consequences. Real product data and
+  review-time savings have not been evaluated.
+- **Findings are temporary.** Refreshing or closing the page clears statuses
+  and notes. Persistence, collaboration, and production hosting are outside
+  this demo's scope. Integration with the separate alerts project is deferred.
 
 The [pressure scenario](second-working-scenario.md) tests the same policy with
 a separate pump-control branch. Both branches reach the shared Brew regulation
 specification, with distinct explanation paths. Traversal stops at that topic,
 so its shared connections do not pull the other engineering branch into results.
-The current demo already supports its core task: **change a parameter,
+The current demo already supports its core task: **change a parameter or behaviour,
 see what may need review, and understand why.**
 
 ## Try the demo

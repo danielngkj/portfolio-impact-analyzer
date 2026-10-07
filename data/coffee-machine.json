@@ -6,7 +6,8 @@
       "name": "Brew target temperature",
       "value": 93,
       "unit": "°C",
-      "detail": "Configured brew target, currently 93°C"
+      "detail": "Configured brew target, currently 93°C",
+      "proposed_value": 95
     },
     {
       "id": "MOD-001",
@@ -18,7 +19,15 @@
       "id": "BEH-001",
       "type": "Behaviour",
       "name": "Brew temperature regulation",
-      "detail": "Regulates temperature toward the configured target"
+      "detail": "Regulates temperature toward the configured target",
+      "current_behaviour": "Brewing starts once temperature reaches the configured target.",
+      "proposed_behaviour": "Temperature must stay within ±1°C of the configured target for five continuous seconds before brewing starts.",
+      "review_questions": {
+        "MOD-001": "Does the controller gate brewing on five continuous seconds within tolerance and reset the timer when temperature leaves that band?",
+        "REQ-001": "Should the readiness requirement specify five continuous seconds within ±1°C before brewing starts?",
+        "TEST-001": "Do tests cover early-start prevention, successful readiness after five seconds, and timer reset after leaving tolerance?",
+        "DOC-001": "Does the specification explain the stability interval and the revised condition for starting brewing?"
+      }
     },
     {
       "id": "REQ-001",
@@ -50,7 +59,8 @@
       "name": "Steam target temperature",
       "value": 125,
       "unit": "°C",
-      "detail": "Separate steam setting, currently 125°C"
+      "detail": "Separate steam setting, currently 125°C",
+      "proposed_value": 126
     },
     {
       "id": "DOC-003",
@@ -64,7 +74,8 @@
       "name": "Brew target pressure",
       "value": 9,
       "unit": "bar",
-      "detail": "Configured brew pressure target, currently 9 bar"
+      "detail": "Configured brew pressure target, currently 9 bar",
+      "proposed_value": 10
     },
     {
       "id": "MOD-002",
@@ -76,7 +87,9 @@
       "id": "BEH-002",
       "type": "Behaviour",
       "name": "Brew pressure regulation",
-      "detail": "Regulates brew pressure toward the configured target"
+      "detail": "Regulates brew pressure toward the configured target",
+      "current_behaviour": "Regulates brew pressure toward the configured target during extraction.",
+      "proposed_behaviour": "Ramp pressure gradually to the configured target over the first three seconds of extraction."
     },
     {
       "id": "REQ-002",

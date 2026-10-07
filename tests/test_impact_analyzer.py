@@ -2,7 +2,7 @@ import copy
 import json
 import unittest
 
-from impact_analyzer import DATA_PATH, analyze, validate_graph
+from impact_analyzer import DATA_PATH, analyze, format_report, supported_scenarios, validate_graph
 
 
 class ImpactTests(unittest.TestCase):
@@ -87,6 +87,82 @@ class ImpactTests(unittest.TestCase):
     def test_duplicate_edges_do_not_duplicate_candidates(self):
         self.graph["relationships"] *= 2
         self.assertEqual(len(analyze(self.graph, "PARAM-001", 95)["candidates"]), 6)
+
+    def test_behaviour_change_paths_questions_and_boundaries(self):
+        original = copy.deepcopy(self.graph)
+        behaviour = next(e for e in self.graph["entities"] if e["id"] == "BEH-001")
+        result = analyze(self.graph, "BEH-001", behaviour["proposed_behaviour"])
+        candidates = {c["entity"]["id"]: c for c in result["candidates"]}
+        self.assertEqual(set(candidates), {"MOD-001", "REQ-001", "TEST-001", "DOC-001"})
+        self.assertEqual(result["change"]["current_behaviour"], behaviour["current_behaviour"])
+        self.assertEqual(result["change"]["proposed_behaviour"], behaviour["proposed_behaviour"])
+        self.assertEqual(candidates["MOD-001"]["path"][0]["direction"], "outgoing")
+        self.assertEqual([s["to"] for s in candidates["TEST-001"]["path"]], ["REQ-001", "TEST-001"])
+        for candidate in candidates.values():
+            self.assertTrue(candidate["review_question"])
+            for step in candidate["path"]:
+                self.assertIn(step["stored_edge"], self.graph["relationships"])
+        self.assertEqual(self.graph, original)
+        self.graph["relationships"].append({"source": "BEH-002", "relationship": "implementedBy", "target": "MOD-001"})
+        self.assertEqual({c["entity"]["id"] for c in analyze(self.graph, "BEH-001", behaviour["proposed_behaviour"])["candidates"]}, set(candidates))
+
+    def test_custom_behaviour_context_and_validation(self):
+        result = analyze(self.graph, "BEH-001", "  Wait ten seconds before brewing.  ")
+        self.assertEqual(result["change"]["proposed_behaviour"], "Wait ten seconds before brewing.")
+        self.assertTrue(all("five" not in c["review_question"] for c in result["candidates"]))
+        for proposed in ["", "   ", 5, None, True]:
+            with self.subTest(proposed=proposed), self.assertRaises(ValueError):
+                analyze(self.graph, "BEH-001", proposed)
+
+    def test_scenarios_supply_valid_proposals_and_consistent_questions(self):
+        original = copy.deepcopy(self.graph)
+        scenarios = supported_scenarios(self.graph)["scenarios"]
+        self.assertEqual({s["entity_id"] for s in scenarios}, {"PARAM-001", "PARAM-002", "PARAM-003", "BEH-001", "BEH-002"})
+        for scenario in scenarios:
+            result = analyze(self.graph, scenario["entity_id"], scenario["proposed"])
+            report = format_report(self.graph, result)
+            for candidate in result["candidates"]:
+                self.assertTrue(candidate["review_question"])
+                self.assertIn(candidate["review_question"], report)
+        self.assertEqual(self.graph, original)
+
+    def test_invalid_scenario_metadata(self):
+        changes = [
+            ("PARAM-001", "proposed_value", None),
+            ("PARAM-001", "value", True),
+            ("PARAM-001", "proposed_value", float("inf")),
+            ("PARAM-001", "unit", " "),
+            ("BEH-001", "current_behaviour", " "),
+            ("BEH-001", "proposed_behaviour", 5),
+            ("BEH-001", "review_questions", []),
+            ("BEH-001", "review_questions", {"missing": "Review?"}),
+            ("BEH-001", "review_questions", {"PARAM-001": "Review?"}),
+            ("BEH-001", "review_questions", {"TEST-001": " "}),
+        ]
+        for entity_id, field, value in changes:
+            graph = copy.deepcopy(self.graph)
+            next(e for e in graph["entities"] if e["id"] == entity_id)[field] = value
+            with self.subTest(entity=entity_id, field=field, value=value), self.assertRaises(ValueError):
+                supported_scenarios(graph)
+
+    def test_unchanged_proposals_have_no_candidates(self):
+        original = copy.deepcopy(self.graph)
+        for scenario in supported_scenarios(self.graph)["scenarios"]:
+            values = [scenario["current"]]
+            if scenario["kind"] == "behaviour":
+                values.append("  " + scenario["current"] + "\n")
+            else:
+                values.append(float(scenario["current"]))
+            for proposed in values:
+                result = analyze(self.graph, scenario["entity_id"], proposed)
+                self.assertFalse(result["change"]["has_change"])
+                self.assertEqual(result["candidates"], [])
+                self.assertIn("No change proposed", format_report(self.graph, result))
+            changed = analyze(self.graph, scenario["entity_id"], scenario["proposed"])
+            self.assertTrue(changed["change"]["has_change"])
+            self.assertTrue(changed["candidates"])
+        self.assertEqual(self.graph, original)
+        self.assertTrue(analyze(self.graph, "PARAM-001", 93.000001)["change"]["has_change"])
 
     def test_invalid_input(self):
         for entity_id, value in [("missing", 95), ("MOD-001", 95), ("PARAM-001", float("nan")), ("PARAM-001", float("inf"))]:
