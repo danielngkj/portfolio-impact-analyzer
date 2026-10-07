@@ -3,17 +3,232 @@ let model;
 let entities;
 let scenarios;
 let busy = false;
+let activeReport;
+let reportTimestamp;
+let copyTimer;
 const reviews = new Map();
 let activeFindings;
 let activeCandidateIds = [];
-const reviewStatuses = ['Unreviewed', 'Needs investigation', 'Needs change', 'No change needed'];
+let activeStatusFilter = null;
+const reviewStatuses = ['Needs change', 'Needs investigation', 'No change needed'];
 
 function updateReviewProgress() {
   const counts = Object.fromEntries(reviewStatuses.map((status) => [status, 0]));
-  for (const id of activeCandidateIds) counts[activeFindings.get(id)?.status || 'Unreviewed']++;
-  $('review-progress').textContent = `${counts.Unreviewed} unreviewed · ${counts['Needs investigation']} need investigation · ${counts['Needs change']} need change · ${counts['No change needed']} need no change`;
+  for (const id of activeCandidateIds) counts[activeFindings.get(id)?.status || 'Needs change']++;
+  $('review-progress').replaceChildren();
+  for (const [index, status] of reviewStatuses.entries()) {
+    const count = element('button', undefined, 'review-status-count');
+    count.type = 'button';
+    count.setAttribute('aria-pressed', String(activeStatusFilter === status));
+    count.addEventListener('click', () => {
+      activeStatusFilter = activeStatusFilter === status ? null : status;
+      document.querySelectorAll('.candidate-review[open]').forEach((review) => { review.open = false; });
+      updateReviewProgress();
+      Array.from($('review-progress').children).find((button) => button.dataset.reviewStatus === status)?.focus();
+    });
+    count.dataset.reviewStatus = status;
+    count.tabIndex = 0;
+    count.setAttribute('aria-label', `${status}: ${counts[status]}`);
+    const number = element('strong', counts[status]);
+    number.setAttribute('aria-hidden', 'true');
+    const tooltip = element('span', activeStatusFilter === status ? `${status} · Show all` : `${status} · Filter`, 'status-tooltip');
+    tooltip.id = `count-tooltip-${index}`;
+    tooltip.setAttribute('role', 'tooltip');
+    count.setAttribute('aria-describedby', tooltip.id);
+    count.append(statusIcon(status), number, tooltip);
+    $('review-progress').append(count);
+  }
+  applyStatusFilter();
 }
+
+function applyStatusFilter() {
+  for (const id of ['engineering', 'documentation']) {
+    const container = $(id);
+    const cards = Array.from(container.querySelectorAll('.candidate'));
+    for (const card of cards) {
+      // Keep an active editor available until its note is finished.
+      card.hidden = Boolean(activeStatusFilter && card.dataset.reviewStatus !== activeStatusFilter && !card.querySelector('.candidate-review').open);
+    }
+    container.querySelector('.filter-empty')?.remove();
+    const visible = cards.filter((card) => !card.hidden).length;
+    if (activeStatusFilter && cards.length && !visible) container.append(element('p', 'No matching artifacts.', 'empty filter-empty'));
+    $(`${id}-count`).textContent = activeStatusFilter ? `${visible} / ${cards.length}` : `${cards.length} ${cards.length === 1 ? 'candidate' : 'candidates'}`;
+  }
+}
+
 const typeLabels = {Parameter: 'Parameter', SoftwareModule: 'Software module', Behaviour: 'Behaviour', Requirement: 'Requirement', Test: 'Test', DocumentationTopic: 'Documentation topic'};
+
+// Lucide copy, message-square, search, pencil, and circle-check geometry (see icons/LICENSE).
+const statusIconShapes = {
+  'note': [['path', {d: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'}]],
+  'copy': [['rect', {x: 9, y: 9, width: 13, height: 13, rx: 2}], ['path', {d: 'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'}]],
+  'Needs investigation': [['circle', {cx: 11, cy: 11, r: 8}], ['path', {d: 'm21 21-4.3-4.3'}]],
+  'Needs change': [['path', {d: 'M21.174 6.812a1 1 0 0 0-3.986-3.986L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.5z'}], ['path', {d: 'm15 5 4 4'}]],
+  'No change needed': [['circle', {cx: 12, cy: 12, r: 10}], ['path', {d: 'm9 12 2 2 4-4'}]],
+};
+
+function statusIcon(status) {
+  const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  for (const [name, value] of Object.entries({viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'status-icon'})) icon.setAttribute(name, value);
+  for (const [tag, attributes] of statusIconShapes[status]) {
+    const shape = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [name, value] of Object.entries(attributes)) shape.setAttribute(name, value);
+    icon.append(shape);
+  }
+  return icon;
+}
+
+function resetCopyState() {
+  clearTimeout(copyTimer);
+  $('copy-report').replaceChildren(statusIcon('copy'));
+  $('copy-report').title = 'Copy report';
+  $('copy-report').setAttribute('aria-label', 'Copy report');
+  $('copy-feedback').textContent = '';
+}
+
+function markdownText(value) {
+  return String(value).replace(/([\\`*_{}\[\]<>#])/g, '\\$1');
+}
+
+function buildReviewReport(result, findings, timestamp) {
+  const change = result.change;
+  const before = change.kind === 'behaviour' ? change.current_behaviour : `${change.current_value} ${change.unit}`;
+  const after = change.kind === 'behaviour' ? change.proposed_behaviour : `${change.proposed_value} ${change.unit}`;
+  const lines = [`# Change review: ${markdownText(change.entity.name)}`, '',
+    `Artifact: ${change.entity.id}`, `Analyzed: ${timestamp}`, '',
+    `Current: ${markdownText(before)}`, `Proposed: ${markdownText(after)}`];
+  const counts = Object.fromEntries(reviewStatuses.map((status) => [status, 0]));
+  for (const candidate of result.candidates) counts[findings.get(candidate.entity.id)?.status || 'Needs change']++;
+  lines.push('', '## Review summary', '',
+    `- Needs change: ${counts['Needs change']}`,
+    `- Needs investigation: ${counts['Needs investigation']}`,
+    `- No change needed: ${counts['No change needed']}`);
+  if (!result.candidates.length && before.trim() === after.trim()) lines.push('No change proposed.');
+  const noChangeNeeded = [];
+  for (const candidate of result.candidates) {
+    const item = candidate.entity;
+    const finding = findings.get(item.id) || {status: 'Needs change', note: ''};
+    if (finding.status === 'No change needed') {
+      noChangeNeeded.push(item);
+      continue;
+    }
+    lines.push('', `## ${markdownText(item.name)} — ${finding.status}`, '',
+      `${item.id} · ${typeLabels[item.type]}`, '',
+      `Review question: ${markdownText(candidate.review_question)}`);
+    if (finding.note.trim()) {
+      lines.push('', 'Finding:', ...finding.note.trimEnd().split(/\r?\n/).map((line) => `> ${markdownText(line)}`));
+    }
+    let path = markdownText(change.entity.name);
+    for (const step of candidate.path) path += ` → ${step.label} → ${markdownText(entities[step.to].name)}`;
+    lines.push('', `Connection: ${path}`);
+  }
+  if (noChangeNeeded.length) {
+    lines.push('', '## No change needed', '');
+    for (const item of noChangeNeeded) {
+      const note = findings.get(item.id)?.note.trim().replace(/\s+/g, ' ') || '';
+      lines.push(`- ${item.id} · ${markdownText(item.name)}${note ? ` — ${markdownText(note)}` : ''}`);
+    }
+  }
+  return lines.join('\n');
+}
+
+function highlightReport(report) {
+  const preview = $('report-preview');
+  preview.replaceChildren();
+  const lines = report.split('\n');
+  lines.forEach((line, index) => {
+    const row = element('span', undefined, 'report-line');
+    if (line.startsWith('# ')) row.classList.add('report-title');
+    else if (line.startsWith('## ')) row.classList.add('report-artifact');
+    else if (line.startsWith('> ')) row.classList.add('report-note');
+    if (line.startsWith('## ')) {
+      const status = reviewStatuses.find((value) => line.endsWith(` — ${value}`));
+      if (status) {
+        row.append(element('span', line.slice(0, -status.length)));
+        const badge = element('span', status, 'report-status');
+        badge.dataset.reviewStatus = status;
+        row.append(badge);
+      } else row.textContent = line;
+    } else {
+      const label = line.match(/^(Artifact|Analyzed|Current|Proposed|Review question|Finding|Connection):/);
+      if (label) row.append(element('span', label[0], 'report-label'), element('span', line.slice(label[0].length)));
+      else row.textContent = line;
+    }
+    // Preserve exactly the Markdown text, including line breaks, for copying.
+    if (index < lines.length - 1) row.append(element('span', '\n'));
+    preview.append(row);
+  });
+}
+
+function updateReportPreview() {
+  if (!activeReport) return;
+  highlightReport(buildReviewReport(activeReport, activeFindings, reportTimestamp));
+  resetCopyState();
+}
+
+async function copyReport() {
+  const report = $('report-preview').textContent;
+  try {
+    await navigator.clipboard.writeText(report);
+    if ($('report-preview').textContent !== report || $('report').hidden) return;
+    $('copy-report').replaceChildren(statusIcon('No change needed'));
+    $('copy-report').title = 'Copied';
+    $('copy-report').setAttribute('aria-label', 'Copied');
+    $('copy-feedback').textContent = 'Copied';
+    copyTimer = setTimeout(resetCopyState, 2000);
+  } catch {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents($('report-preview'));
+    selection.removeAllRanges(); selection.addRange(range);
+    $('report-preview').focus();
+    $('copy-feedback').textContent = 'Automatic copy unavailable. Report selected; press Control+C or Command+C.';
+    $('copy-report').title = 'Copy unavailable; copy the selected report manually';
+  }
+}
+
+const tocSections = [
+  ['proposed-change', 'Proposed change'], ['change-summary', 'Change summary'],
+  ['review-overview', 'Review findings'], ['engineering-review', 'Engineering'],
+  ['documentation-review', 'Documentation'], ['review-report', 'Review report'],
+];
+
+function updateToc() {
+  $('page-toc').hidden = $('report').hidden || $('review-overview').hidden;
+  $('toc-links').replaceChildren();
+  if ($('page-toc').hidden) return;
+  for (const [id, label] of tocSections) {
+    if ($(id).closest('[hidden]')) continue;
+    const link = element('a', label);
+    link.href = `#${id}`;
+    const row = element('li');
+    row.append(link);
+    $('toc-links').append(row);
+  }
+  updateTocPosition();
+}
+
+function updateTocPosition() {
+  const links = Array.from($('toc-links').querySelectorAll('a'));
+  let active = links[0];
+  for (const link of links) {
+    if ($(link.hash.slice(1)).getBoundingClientRect().top <= 120) active = link;
+  }
+  if (window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) active = links[links.length - 1];
+  for (const link of links) {
+    if (link === active) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
+  }
+}
+
+let tocScrollPending = false;
+function scheduleTocUpdate() {
+  if (tocScrollPending) return;
+  tocScrollPending = true;
+  requestAnimationFrame(() => { tocScrollPending = false; updateTocPosition(); });
+}
+window.addEventListener('scroll', scheduleTocUpdate, {passive: true});
+window.addEventListener('resize', scheduleTocUpdate);
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -87,17 +302,17 @@ function renderTextChanges(change) {
   $('text-diff').replaceChildren();
   if (disclosure.hidden) return;
   const changes = textChanges(change.current_behaviour, change.proposed_behaviour);
-  for (const part of changes) {
-    const tag = part.kind === 'removed' ? 'del' : part.kind === 'added' ? 'ins' : 'span';
-    const segment = element(tag, part.text);
-    if (part.kind !== 'same') {
-      const announcement = element('span', `${part.kind === 'removed' ? 'Removed' : 'Added'} text: `, 'sr-only');
-      const end = element('span', ` End ${part.kind} text. `, 'sr-only');
-      $('text-diff').append(announcement, segment, end);
-    } else $('text-diff').append(segment);
+  for (const [label, excluded, highlight] of [['Current', 'added', 'removed'], ['Proposed', 'removed', 'added']]) {
+    const row = element('div', undefined, 'diff-row');
+    const text = element('p');
+    for (const part of changes) {
+      if (part.kind === excluded) continue;
+      const segment = element('span', part.text, part.kind === highlight ? `diff-${highlight}` : undefined);
+      text.append(segment);
+    }
+    row.append(element('span', label, 'summary-label'), text);
+    $('text-diff').append(row);
   }
-  $('diff-caption').textContent = changes.some((part) => part.kind !== 'same')
-    ? 'Wording comparison only; this does not determine engineering impact.' : 'No text changes.';
 }
 
 async function request(url) {
@@ -109,21 +324,64 @@ async function request(url) {
 
 function setBusy(value) {
   busy = value;
-  for (const id of ['change-kind', 'entity', 'analyze']) $(id).disabled = value;
-  $('proposed').disabled = value || $('change-kind').value === 'Behaviour';
+  $('change-kind').disabled = value;
+  const selected = Boolean($('change-kind').value);
+  $('change-fields').disabled = value || !selected;
+  for (const id of ['entity', 'analyze']) $(id).disabled = value || !selected;
+  $('proposed').disabled = value || !selected || $('change-kind').value === 'Behaviour';
   $('proposed-behaviour').disabled = value || $('change-kind').value !== 'Behaviour';
   document.querySelector('.results').setAttribute('aria-busy', String(value));
 }
 
+function resetResultsReveal() {
+  $('proposed-change').getAnimations({subtree: true}).forEach((animation) => animation.cancel());
+  $('report').querySelectorAll('[inert]').forEach((section) => { section.inert = false; });
+}
+
 function clearReport(message) {
+  resetResultsReveal();
+  activeReport = null;
+  $('report-preview').textContent = '';
+  resetCopyState();
   $('report').hidden = true;
+  updateToc();
   $('error').hidden = true;
   $('status').textContent = message;
 }
 
 function selectKind() {
   const kind = $('change-kind').value;
-  $('entity-label').replaceChildren(artifactName({type: kind, name: typeLabels[kind]}));
+  const workspace = document.querySelector('.workspace');
+  const selector = $('change-kind');
+  const previous = selector.getBoundingClientRect();
+  const leavingLanding = workspace.classList.contains('landing') && Boolean(kind);
+  workspace.classList.toggle('landing', !kind);
+  if (leavingLanding && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const destination = selector.getBoundingClientRect();
+    $('change-form-panel').animate([
+      {transform: `translate(${previous.left - destination.left}px, ${previous.top - destination.top}px)`},
+      {transform: 'translate(0, 0)'}
+    ], {duration: 320, easing: 'ease-out'});
+  }
+  $('artifact-selector').hidden = !kind;
+  $('change-fields').hidden = !kind;
+  if (!kind) {
+    workspace.classList.remove('analysis-started');
+    $('entity').replaceChildren();
+    $('entity-label').textContent = 'Item';
+    $('parameter-detail').textContent = '';
+    $('current-value').textContent = '—';
+    $('proposed').value = '';
+    $('proposed-behaviour').value = '';
+    $('proposed').hidden = false;
+    $('proposed-behaviour').hidden = true;
+    $('proposed-label').htmlFor = 'proposed';
+    $('proposed-label').textContent = 'Proposed value';
+    clearReport('Select a change type to begin.');
+    setBusy(busy);
+    return;
+  }
+  $('entity-label').replaceChildren(artifactName({type: kind, name: 'Item'}));
   $('entity').replaceChildren();
   for (const item of model.entities.filter((item) => item.type === kind && scenarios[item.id])) {
     const option = element('option', item.name);
@@ -131,6 +389,7 @@ function selectKind() {
     $('entity').append(option);
   }
   selectEntity();
+  setBusy(busy);
 }
 
 function selectEntity() {
@@ -193,52 +452,98 @@ function candidateCard(candidate, change) {
   viewport.append(path);
   details.append(viewport, evidence);
   card.append(details);
-  const finding = activeFindings.get(item.id) || {status: 'Unreviewed', note: ''};
+  const finding = activeFindings.get(item.id) || {status: 'Needs change', note: ''};
   activeFindings.set(item.id, finding);
   const review = element('details', undefined, 'candidate-review');
-  const reviewSummary = element('summary', finding.status);
-  reviewSummary.setAttribute('aria-label', `Review status for ${item.name}: ${finding.status}. Edit review`);
+  const reviewSummary = element('summary');
+  reviewSummary.append(statusIcon('note'));
+  reviewSummary.title = 'Review note';
+  reviewSummary.setAttribute('aria-label', `Review note for ${item.name}`);
   review.append(reviewSummary);
+  review.addEventListener('toggle', () => {
+    if (!review.open) applyStatusFilter();
+    if (review.open) {
+      document.querySelectorAll('.candidate-review[open]').forEach((other) => {
+        if (other !== review) other.open = false;
+      });
+    }
+  });
   const controls = element('div', undefined, 'review-controls');
-  const statusLabel = element('label', 'Your review status');
-  const statusInput = element('select');
-  statusInput.id = `review-status-${item.id}`;
-  statusLabel.htmlFor = statusInput.id;
-  for (const status of reviewStatuses) {
-    const option = element('option', status);
-    option.value = status;
-    statusInput.append(option);
-  }
-  statusInput.value = finding.status;
+  const actions = element('div', undefined, 'candidate-actions');
+  const statusButtons = element('div', undefined, 'card-status-buttons');
+  statusButtons.setAttribute('role', 'group');
+  statusButtons.setAttribute('aria-label', `Review status for ${item.name}`);
   const noteLabel = element('label', 'Review note');
   const noteInput = element('textarea');
   noteInput.id = `review-note-${item.id}`;
   noteLabel.htmlFor = noteInput.id;
   noteInput.rows = 2;
-  noteInput.placeholder = 'Record your finding or reason (optional)';
+  noteInput.placeholder = 'Enter to finish · Shift+Enter for a new line';
   noteInput.value = finding.note;
-  statusInput.addEventListener('change', () => {
-    finding.status = statusInput.value;
-    reviewSummary.textContent = finding.status;
-    reviewSummary.setAttribute('aria-label', `Review status for ${item.name}: ${finding.status}. Edit review`);
-    card.dataset.reviewStatus = finding.status;
-    updateReviewProgress();
+  const noteFeedback = element('span', '', 'note-feedback');
+  noteFeedback.setAttribute('role', 'status');
+  noteFeedback.setAttribute('aria-live', 'polite');
+  let feedbackTimer;
+  for (const status of reviewStatuses) {
+    const button = element('button', undefined, 'card-status-button');
+    button.type = 'button';
+    button.dataset.reviewStatus = status;
+    button.setAttribute('aria-label', status);
+    button.setAttribute('aria-pressed', String(finding.status === status));
+    const tooltip = element('span', status, 'status-tooltip');
+    button.append(statusIcon(status), tooltip);
+    button.addEventListener('click', () => {
+      finding.status = status;
+      card.dataset.reviewStatus = status;
+      for (const sibling of statusButtons.children) sibling.setAttribute('aria-pressed', String(sibling === button));
+      review.open = status === 'Needs investigation';
+      updateReviewProgress();
+      updateReportPreview();
+      if (review.open) noteInput.focus();
+      else if (card.hidden) $('review-progress').querySelector('[aria-pressed="true"]')?.focus();
+    });
+    statusButtons.append(button);
+  }
+  noteInput.addEventListener('input', () => {
+    finding.note = noteInput.value;
+    updateReportPreview();
+    clearTimeout(feedbackTimer);
+    noteFeedback.textContent = finding.note.trimEnd().endsWith('.') ? 'Report updated' : '';
+    if (noteFeedback.textContent) feedbackTimer = setTimeout(() => { noteFeedback.textContent = ''; }, 2500);
   });
-  noteInput.addEventListener('input', () => { finding.note = noteInput.value; });
+  noteInput.addEventListener('blur', () => {
+    finding.note = noteInput.value.trimEnd();
+    noteInput.value = finding.note;
+    updateReportPreview();
+  });
+  noteInput.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
+    event.preventDefault();
+    noteInput.blur();
+    review.open = false;
+    applyStatusFilter();
+    if (card.hidden) $('review-progress').querySelector('[aria-pressed="true"]')?.focus();
+    else reviewSummary.focus();
+  });
   card.dataset.reviewStatus = finding.status;
-  controls.append(statusLabel, statusInput, noteLabel, noteInput);
+  controls.append(noteLabel, noteInput, noteFeedback);
   review.append(controls);
-  card.append(review);
+  actions.append(statusButtons, review);
+  card.append(actions);
   return card;
 }
 
 function render(result) {
+  document.querySelector('.workspace').classList.add('analysis-started');
   const change = result.change;
+  activeStatusFilter = null;
   // Compare the actual proposal; older running servers may omit has_change.
   const hasChange = change.kind === 'behaviour'
     ? change.current_behaviour.trim() !== change.proposed_behaviour.trim()
     : change.current_value !== change.proposed_value;
   const candidatesForReview = hasChange ? result.candidates : [];
+  activeReport = {...result, candidates: candidatesForReview};
+  reportTimestamp = new Date().toISOString();
   // Findings belong to the exact proposal, never merely the shared artifact.
   const reviewKey = JSON.stringify([change.entity.id, change.current_value ?? change.current_behaviour,
     change.proposed_value ?? change.proposed_behaviour, change.unit ?? '']);
@@ -267,10 +572,48 @@ function render(result) {
   }
   $('review-overview').hidden = !hasChange;
   updateReviewProgress();
+  updateReportPreview();
   $('report').hidden = false;
+  updateToc();
   $('status').textContent = !hasChange
     ? 'No change proposed. The proposal matches the current value or behaviour; no review candidates are needed.'
     : `${candidatesForReview.length} potential review ${candidatesForReview.length === 1 ? 'candidate' : 'candidates'} for ${change.entity.name.toLowerCase()}.`;
+  revealResults();
+}
+
+function revealResults() {
+  resetResultsReveal();
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const fadeDuration = 750;
+    const groupPause = 100;
+    const blocks = [$('change-summary'), $('counts'), $('review-overview')];
+    for (const id of ['engineering-review', 'documentation-review']) {
+      if (!$(id).hidden) {
+        blocks.push($(id).querySelector('.group-heading'), ...$(id).querySelectorAll('.candidate, .empty'));
+      }
+    }
+    if (!$('review-overview').hidden) blocks.push($('review-report'));
+    const screenHeight = Math.max(240, window.innerHeight - 48);
+    let group = 0;
+    let groupTop = blocks[0].getBoundingClientRect().top;
+    blocks.filter((block) => !block.hidden).forEach((section) => {
+      const bounds = section.getBoundingClientRect();
+      // Keep complete cards together, pausing only when the next block
+      // would extend beyond the current screenful.
+      if (bounds.bottom > groupTop + screenHeight && bounds.top > groupTop) {
+        group += 1;
+        groupTop = bounds.top;
+      }
+      section.inert = true;
+      const frames = [
+        {opacity: 0},
+        {opacity: 1}
+      ];
+      const timing = {duration: fadeDuration, delay: group * (fadeDuration + groupPause), fill: 'backwards', easing: 'cubic-bezier(0.22, 1, 0.36, 1)'};
+      const animation = section.animate(frames, timing);
+      animation.onfinish = () => { section.inert = false; };
+    });
+  }
 }
 
 async function runAnalysis() {
@@ -296,6 +639,26 @@ async function runAnalysis() {
     setBusy(false);
   }
 }
+
+document.addEventListener('click', (event) => {
+  document.querySelectorAll('.candidate-review[open]').forEach((review) => {
+    if (!review.parentElement.contains(event.target)) review.open = false;
+  });
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  document.querySelectorAll('.candidate-review[open]').forEach((review) => {
+    const restoreFocus = review.contains(document.activeElement);
+    review.open = false;
+    applyStatusFilter();
+    if (restoreFocus) {
+      if (review.closest('.candidate').hidden) $('review-progress').querySelector('[aria-pressed="true"]')?.focus();
+      else review.querySelector('summary').focus();
+    }
+  });
+});
+
+$('copy-report').addEventListener('click', copyReport);
 
 $('change-form').addEventListener('submit', (event) => { event.preventDefault(); runAnalysis(); });
 $('change-kind').addEventListener('change', selectKind);

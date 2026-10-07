@@ -47,7 +47,7 @@ Its parameter and documentation topic stay outside the brew result.
 
 The browser workflow has three steps:
 
-1. Select a parameter or behaviour and enter a proposed value or description.
+1. Choose a type of change, select an item, and enter a value or description.
 2. Review the engineering and documentation groups.
 3. Expand **Show connection path** to inspect the explanation.
 
@@ -81,16 +81,39 @@ seconds. Starting at the behaviour returns its implementing module, requirement,
 verifying test, and documentation topic. Modules terminate traversal for behaviour
 changes to avoid expanding through shared implementations into unrelated behaviours.
 
-The browser shows current/proposed descriptions with an optional word-level diff.
+The browser shows current/proposed descriptions with an optional word-level diff
+using separate Current and Proposed sentences with subtle highlights.
 Lucide icons distinguish artifact types in cards and visual connection paths.
 Backend review questions are shared by browser, API, and CLI. Scenario suggestions
 come from the model through `/api/scenarios`.
 
-Each candidate starts Unreviewed. A reviewer can record Needs investigation,
-Needs change, or No change needed and an optional note. These human findings are
-separate from the graph's suggestions and remain available per proposal while
-the page is open. An unchanged value or matching trimmed behaviour description
-returns zero candidates and a No change proposed message.
+Each candidate defaults to Needs change as a demo starting state, not a proven
+engineering conclusion. Three direct icon buttons select Needs change, Needs
+investigation, or No change needed. Selecting investigation opens the note editor.
+Completed no-change cards become grey and compact. Status counts double as filters;
+filtering changes card visibility without excluding artifacts from the report.
+
+A visible Markdown report updates as statuses and notes change. It contains the
+proposal, analysis timestamp, status summary, findings, and connection paths.
+No change needed items are summarized together, with their notes. A copy icon
+makes the report available for a change ticket without downloading a file.
+Enter finishes a note; Shift+Enter inserts a line break. Trailing line breaks
+are trimmed. Findings stay associated with each exact proposal while the page
+is open and clear on refresh.
+
+The initial centered card reveals fields and moves into a left sidebar after a
+change type is selected. Editing preserves the sidebar layout; clearing the type
+restores the initial card. Form controls fade in sequentially and results reveal
+in groups sized to the viewport, respecting reduced-motion preferences.
+A conditional right-hand table of contents helps
+navigate long reports. The case study uses the same header and footer as the app.
+An unchanged value or matching trimmed behaviour description returns zero
+candidates and a No change proposed message.
+
+Review questions are predefined guidance, not generated engineering conclusions.
+The stored example uses authored questions; custom descriptions receive general
+questions by artifact type. Candidate selection and explanation paths are computed
+from recorded graph relationships and the traversal policy.
 
 ## Why documentation matters here
 
@@ -119,8 +142,9 @@ The demo shares one analysis engine across both interfaces:
 - **HTML, CSS, and JavaScript:** the browser interface calls the Python engine.
 - **21 automated tests:** cover review selection, explanations, API behaviour,
   and model integrity, including scenario metadata validation, exact pressure
-  candidates, shared-topic boundaries, and unchanged proposals. Earlier manual browser checks covered brew temperature and steam,
-  expandable paths, input validation, and clearing old results. The
+  candidates, shared-topic boundaries, and unchanged proposals. A Safari walkthrough
+  on 7 October 2026 checked status buttons, filters, note entry, report copying,
+  visual paths, text comparison, preserved findings, and unchanged proposals. The
   [README walkthrough](../README.md#test-the-scenarios-yourself) includes pressure
   and comparison of the shared documentation paths.
 

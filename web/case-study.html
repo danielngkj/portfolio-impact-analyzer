@@ -7,10 +7,9 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <header><a class="brand" href="/">Impact / Analyzer</a><span class="badge">Portfolio case study</span></header>
-  <main class="case-study">
-    <a class="back-link" href="/">← Back to Impact Analyzer</a>
-    <article>
+  <header><a class="brand" href="/">Impact / Analyzer</a><div class="header-links"><a class="case-study-link" href="/case-study">Case study</a></div></header>
+  <main>
+    <article class="case-study">
       <h1>Impact Analyzer: from engineering change to review plan</h1>
       <p class="case-lead">A small tool that helps engineers and technical writers identify what may need review when a product setting or behaviour changes—and inspect why each item appears.</p>
       <p>The demo models a fictional industrial coffee machine. All data is synthetic.</p>
@@ -34,7 +33,11 @@
       <p>A pressure-setting scenario exercises a separate pump-control branch. Both branches reach the same regulation specification, but traversal stops at documentation, so the shared topic does not pull unrelated engineering artifacts into the result.</p>
       <h2>Beyond a numeric setting</h2>
       <p>The behaviour scenario proposes requiring five continuous seconds within temperature tolerance before brewing starts. It begins at the behaviour and reaches its implementing module, requirement, verifying test, and documentation topic. Modules terminate traversal for behaviour changes, preventing shared implementations from expanding the review into unrelated behaviours.</p>
-      <p>Current and proposed descriptions remain visible, with an optional word-level text comparison. Reviewers can record a status and note on each candidate. Findings are held for each proposal while the page remains open; refreshing clears them.</p>
+      <p>Current and proposed descriptions remain visible. The optional text comparison shows separate sentences with subtle highlights. Review questions are predefined guidance: authored for the stored example or general questions for a custom proposal. They are not automatically inferred engineering conclusions.</p>
+      <h2>From candidates to review findings</h2>
+      <p>Candidates default to Needs change as a demo starting state, not a proven conclusion. Three icon buttons let reviewers select Needs change, Needs investigation, or No change needed directly. Investigation opens the note editor; no-change cards become grey and compact. The status counts filter the card list without excluding items from the report.</p>
+      <p>An expanded Markdown report updates as statuses and notes change. It includes the proposal, timestamp, status totals, findings, and connection paths. No-change items are summarized together with any notes. A copy icon lets reviewers paste the report into a change ticket. Enter finishes a note; Shift+Enter adds a line break.</p>
+      <p>The initial centered card moves into a left sidebar when a change type is selected. Clearing the type restores the card. Controls fade in sequentially; results reveal in groups sized to the viewport, respecting reduced-motion preferences. A conditional table of contents helps navigate the results. Findings are kept for each proposal while the page is open; refreshing clears them.</p>
       <h2>Why documentation matters</h2>
       <p><strong>Set brew temperature</strong> directly references the parameter and states its current default. <strong>Brew regulation specification</strong> is reached indirectly because it describes the related behaviour. These connections identify different reasons to review content.</p>
       <p><strong>A connection warrants review; it does not prove an artifact must change.</strong> A requirement stated relative to the configured target may still be valid at 95°C.</p>
@@ -58,7 +61,7 @@
       <h2>Try it</h2>
       <p><a href="/">Open Impact Analyzer</a> to explore setting and behaviour changes. <a href="/case-study.md">Read the original case-study document</a> for the project narrative and source-document references.</p>
     </article>
-    <footer><a href="/">← Back to Impact Analyzer</a><span>Synthetic demonstration model</span></footer>
+    <footer><span>Designed and developed by Daniel Ng.</span><span class="footer-model">Synthetic demonstration model · <a href="/case-study.md">Coffee-machine model</a></span></footer>
   </main>
 </body>
 </html>

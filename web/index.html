@@ -8,51 +8,73 @@
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <header><a class="brand" href="/">Impact / Analyzer</a><span class="badge">Coffee-machine model</span></header>
+  <header><a class="brand" href="/">Impact / Analyzer</a><div class="header-links"><a class="case-study-link" href="/case-study">Case study</a></div></header>
   <main>
     <div class="intro"><h1>Change impact analysis</h1><p>Find what may need review when you change a setting or how a feature works—including software, requirements, tests, and documentation.</p></div>
-    <div class="workspace">
-      <aside class="panel">
-        <h2>Proposed change</h2>
+    <div class="workspace landing">
+      <aside class="sidebar">
+      <section class="panel" id="change-form-panel">
         <form id="change-form">
-          <label for="change-kind">Change type</label>
-          <select id="change-kind" disabled><option value="Parameter">Parameter change</option><option value="Behaviour">Behaviour change</option></select>
-          <label for="entity" id="entity-label">Parameter</label><select id="entity" required disabled></select>
+          <div class="change-selectors">
+            <div>
+              <label for="change-kind">What kind of change are you making?</label>
+              <select id="change-kind" required disabled><option value="" selected>Select change type</option><option value="Parameter">Parameter change</option><option value="Behaviour">Behaviour change</option></select>
+            </div>
+            <div id="artifact-selector" class="artifact-selector" hidden>
+              <label for="entity" id="entity-label">Item</label><select id="entity" required disabled></select>
+            </div>
+          </div>
+          <fieldset id="change-fields" disabled hidden>
           <p id="parameter-detail" class="muted"></p>
           <div class="current"><span id="current-label">Current value</span><strong id="current-value">—</strong></div>
           <label for="proposed" id="proposed-label">Proposed value <span id="unit"></span></label>
           <input id="proposed" type="number" step="any" required disabled>
           <textarea id="proposed-behaviour" rows="6" required disabled hidden aria-label="Proposed behaviour"></textarea>
           <button id="analyze" type="submit" disabled>Find review candidates <span aria-hidden="true">→</span></button>
+          </fieldset>
         </form>
-        <details class="about-analysis"><summary>About this analysis</summary><p>All data is synthetic. Graph connections identify potential review candidates; they do not prove an artifact must change or predict physical outcomes.</p><p>Your proposal provides context and does not modify the model. Custom behaviour descriptions receive general review questions.</p></details>
+      </section>
       </aside>
-      <section class="results" aria-label="Analysis results" aria-busy="true">
-        <h2>Review candidates</h2>
+      <section id="proposed-change" class="results" aria-label="Analysis results" aria-busy="true">
+        <h2>Proposed change</h2>
         <p id="status" role="status" aria-live="polite">Loading the model…</p>
         <p id="error" role="alert" hidden></p>
         <div id="report" hidden>
-          <div class="change-summary"><p class="summary-label">Changed artifact</p><h3 id="change-title"></h3><div id="change-values" class="change-values"></div>
+          <div id="change-summary" class="change-summary"><p class="summary-label">Changed artifact</p><h3 id="change-title"></h3><div id="change-values" class="change-values"></div>
             <details id="text-changes" class="text-changes" hidden>
               <summary>Show text changes</summary>
-              <p class="diff-legend"><del>Removed</del> <ins>Added</ins></p>
-              <p id="text-diff" class="text-diff"></p>
-              <p id="diff-caption" class="muted"></p>
+              <div id="text-diff" class="text-diff"></div>
             </details>
           </div>
           <p id="counts" class="counts"></p>
           <section id="review-overview" class="review-overview" aria-label="Your review findings">
-            <h3>Your review findings</h3>
+            <div class="review-overview-heading">
+              <h3>Your review findings</h3>
+              <span class="review-info">
+                <button type="button" class="info-trigger" aria-label="About review findings" aria-describedby="review-info-tooltip">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </button>
+                <span id="review-info-tooltip" class="info-tooltip" role="tooltip">Review notes and statuses clear when you refresh or close.</span>
+              </span>
+            </div>
             <p id="review-progress" role="status" aria-live="polite"></p>
-            <p class="muted">Statuses and notes are your findings. They stay available for each proposal while this page is open; refreshing or closing the page clears them.</p>
           </section>
 
-          <section><div class="group-heading"><h3>Engineering review</h3><span id="engineering-count"></span></div><div id="engineering"></div></section>
-          <section><div class="group-heading"><h3>Documentation review</h3><span id="documentation-count"></span></div><div id="documentation"></div></section>
+          <section id="engineering-review"><div class="group-heading"><h3>Engineering review</h3><span id="engineering-count"></span></div><div id="engineering"></div></section>
+          <section id="documentation-review"><div class="group-heading"><h3>Documentation review</h3><span id="documentation-count"></span></div><div id="documentation"></div></section>
+          <section id="review-report" class="review-report" aria-label="Review report">
+            <div class="report-heading"><h3>Review report</h3><button id="copy-report" class="copy-report" type="button" aria-label="Copy report" title="Copy report"></button></div>
+            <pre id="report-preview" tabindex="0"></pre>
+            <span id="copy-feedback" class="sr-only" role="status" aria-live="polite"></span>
+          </section>
         </div>
       </section>
+      <nav id="page-toc" class="page-toc" aria-label="On this page" hidden>
+        <p>On this page</p>
+        <ul id="toc-links"></ul>
+      </nav>
     </div>
-    <footer><span>Impact Analyzer</span><a href="/case-study">Read the case study</a><span>Synthetic demonstration model</span></footer>
+    <footer><span>Designed and developed by Daniel Ng.</span><span class="footer-model">Synthetic demonstration model · <a href="/case-study.md">Coffee-machine model</a></span></footer>
   </main>
 </body>
 </html>

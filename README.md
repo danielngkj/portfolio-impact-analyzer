@@ -1,4 +1,4 @@
-# Portfolio Impact Analyzer
+# Impact Analyzer
 
 A relationship-driven review tool for a fictional industrial coffee machine.
 The working demo models a proposed brew target change from 93°C to
@@ -28,10 +28,19 @@ python3 web_server.py
 Open <http://127.0.0.1:8000>. Use `--port 8001` if port 8000 is already in use.
 Stop the server with Ctrl+C.
 
-The interface opens with the brew-temperature proposal ready to review; analysis runs when you select **Find review candidates**. Choose a parameter,
-enter a proposed value, and select **Find review candidates**. Engineering and
-documentation results are grouped separately. Expand **Show connection path** to
-inspect the path, stored relationships, and traversal directions.
+The interface starts with a centered card asking **What kind of change are you making?** Select **Parameter change** or
+**Behaviour change** to reveal the item selector and proposal fields, then
+select **Find review candidates**. Selecting a type moves the form into the left
+sidebar. Editing or rerunning proposals preserves that layout; selecting
+**Select change type** restores the clean centered card. Controls fade in
+sequentially, and results fade in by roughly a screenful at a time. Reduced-motion
+preferences disable these animations.
+
+Engineering and documentation results are grouped separately. Lucide icons
+identify artifact types. Expand **Show connection path** for a visual chain,
+and **Show relationship evidence** for stored edges and traversal directions.
+The right-hand **On this page** navigation appears only for analyzed changes
+and adapts to a link row on smaller screens.
 
 Changing the form clears the previous report until you run the analysis again.
 The steam example returns only its directly connected documentation topic.
@@ -142,22 +151,54 @@ missing units, invalid question references, and empty questions.
 
 ## Review findings
 
-Each candidate starts **Unreviewed**. Expand the review status on a candidate
-to access its status and note fields. The status disclosure sits at the upper
-right of each card and remains visible when collapsed. Choose **Needs investigation**,
-**Needs change**, or **No change needed**, and optionally enter a review note.
-The summary counts each status separately. These are the user's findings,
-separate from the engine's potential review candidates.
+Each candidate defaults to **Needs change** as a demo starting state, not an
+engineering conclusion. Three icon buttons on every card select **Needs change**,
+**Needs investigation**, or **No change needed** in one click. The selected
+button is highlighted and each icon has a tooltip and accessible label.
+
+Selecting Needs investigation opens and focuses the note field. The separate
+note icon also opens it without moving the artifact text. Notes update the report
+as you type; a sentence-ending full stop briefly shows **Report updated**.
+**Enter** finishes the note and closes the editor; **Shift+Enter** adds a new
+line. Trailing line breaks are trimmed. Click outside or press Escape to close.
+No change needed cards become grey and compact, retaining their type, title,
+ID, and status controls. Switching status restores the details.
+
+The icon counts in **Your review findings** filter the cards when clicked.
+Click the selected filter again to show all. An open editor stays available
+until its note is finished, even if its new status no longer matches the filter.
+Filtering affects card visibility only; the generated report always includes
+all candidates. A fresh analysis resets the visible filter.
 
 Findings are held in page memory for each exact proposal. Rerunning the same
 proposal or returning to it restores its findings; a different proposal starts
-unreviewed even when it shares candidates. Refreshing or closing the page
+with the default Needs change status even when it shares candidates. Refreshing or closing the page
 clears findings. Saving and reopening reviews is a future enhancement.
 
 An unchanged proposal returns no candidates and an explicit **No change proposed**
 message. Numeric values are compared numerically; behaviour descriptions are
 compared as text after trimming surrounding whitespace. The analyzer does not
 infer semantic equivalence between differently worded descriptions.
+
+## Live review report
+
+The expanded **Review report** updates when statuses or notes change. It includes
+the current/proposed change, analysis timestamp, status totals, findings, and
+connection paths. No change needed artifacts appear as concise line items in a
+shared section, including any note. Other artifacts retain their review questions
+and detailed paths. Light Markdown highlighting improves readability.
+
+The copy icon copies the exact Markdown shown and briefly changes to a checkmark.
+If clipboard access is unavailable, the report is selected for manual copying.
+Editing the proposal clears the old report until you analyze it again. There is
+no download, database, or server-side storage.
+
+Behaviour reports also offer **Show text changes**: separate Current and Proposed
+sentences with subtle highlights for removed and added words. The text comparison
+does not infer engineering consequences.
+
+Use **Case study** in the header for the browser-readable narrative. The footer's
+**Coffee-machine model** link opens the original Markdown document.
 
 ## Portfolio scope
 
@@ -169,3 +210,19 @@ or guarantee complete coverage. Requirements are review targets rather than
 change inputs; persistence, collaboration, production hosting, and alerts-project
 integration are deferred. The [case study](docs/portfolio-case-study.md) explains
 these boundaries with examples and is available at `/case-study` in the browser.
+
+## Browser verification
+
+A Safari walkthrough on 7 October 2026 checked the initial reveal of controls,
+parameter and behaviour analysis, all three status buttons, investigation note
+focus, multiline notes and Enter-to-finish, live report updates, compact no-change
+cards, status-filter switching/reset, clipboard success feedback, visual paths
+and stored-edge evidence, returning to a proposal with its findings preserved,
+and unchanged numeric and behaviour proposals. The case-study link and updated
+browser narrative also loaded successfully.
+
+The finishing pass fixed initial-layout CSS specificity and keyboard focus when
+finishing a note hides its card under an active filter. CSS is grouped by component
+with responsive variants together; obsolete heading, dropdown, and graph styles
+were removed. These browser checks complement the 21 engine/HTTP tests rather
+than replacing them.
