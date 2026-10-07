@@ -12,6 +12,7 @@ WEB_ROOT = Path(__file__).parent / "web"
 ASSETS = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/case-study": ("case-study.html", "text/html; charset=utf-8"),
+    "/case-study/": ("case-study.html", "text/html; charset=utf-8"),
     "/case-study.md": ("../docs/portfolio-case-study.md", "text/markdown; charset=utf-8"),
     "/review-paths.svg": ("review-paths.svg", "image/svg+xml"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),

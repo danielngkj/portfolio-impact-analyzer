@@ -241,7 +241,7 @@ const typeIcons = {Parameter: 'sliders-horizontal', SoftwareModule: 'code-xml', 
 
 function artifactIcon(type) {
   const icon = element('img', undefined, 'artifact-icon');
-  icon.src = `/icons/${typeIcons[type]}.svg`;
+  icon.src = `icons/${typeIcons[type]}.svg`;
   icon.alt = '';
   icon.setAttribute('aria-hidden', 'true');
   icon.width = 18;
@@ -664,7 +664,7 @@ $('proposed').addEventListener('input', () => clearReport('Proposed value change
 
 async function initialize() {
   try {
-    const graph = await request('/data/coffee-machine.json');
+    const graph = await request('data/coffee-machine.json');
     const catalog = ImpactAnalyzer.supportedScenarios(graph);
     model = graph;
     scenarios = Object.fromEntries(catalog.scenarios.map((item) => [item.entity_id, item]));

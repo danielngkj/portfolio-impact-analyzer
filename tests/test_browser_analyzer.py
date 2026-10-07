@@ -2,12 +2,14 @@
 import copy
 import ctypes
 import json
+import re
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+from urllib.parse import urljoin, urlsplit
 
 from impact_analyzer import DATA_PATH, analyze, supported_scenarios
 
@@ -134,7 +136,22 @@ class BrowserAnalyzerTests(unittest.TestCase):
             expected.update(f"icons/{path.name}" for path in (ROOT / "web/icons").glob("*.svg"))
             self.assertEqual({str(path.relative_to(site)) for path in site.rglob("*") if path.is_file()}, expected)
             index = (site / "index.html").read_text()
-            self.assertLess(index.index('src="/analyzer.js"'), index.index('src="/app.js"'))
+            self.assertLess(index.index('src="analyzer.js"'), index.index('src="app.js"'))
+            for prefix in ['/', '/portfolio-impact-analyzer/']:
+                for page in ['index.html', 'case-study/index.html']:
+                    markup = (site / page).read_text()
+                    base = f'https://example.com{prefix}{page}'
+                    declared_base = re.search(r'<base href="([^"]+)"', markup)
+                    if declared_base:
+                        base = urljoin(base, declared_base[1])
+                        markup = re.sub(r'<base[^>]+>', '', markup)
+                    for target in re.findall(r'(?:href|src)="([^"]+)"', markup):
+                        path = urlsplit(urljoin(base, target)).path
+                        self.assertTrue(path.startswith(prefix), target)
+                        local = site / path[len(prefix):]
+                        if local.is_dir():
+                            local /= 'index.html'
+                        self.assertTrue(local.is_file(), f'{page}: {target} under {prefix}')
 
 
 if __name__ == "__main__":

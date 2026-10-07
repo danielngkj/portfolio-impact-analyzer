@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
   <title>Case study — Impact Analyzer</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header><a class="brand" href="/">Impact / Analyzer</a><div class="header-links"><a class="case-study-link" href="/case-study">Case study</a></div></header>
+  <header><a class="brand" href="./">Impact / Analyzer</a><div class="header-links"><a class="case-study-link" href="case-study/">Case study</a></div></header>
   <main>
     <article class="case-study">
       <h1>Impact Analyzer: from engineering change to review plan</h1>
@@ -18,7 +19,7 @@
       <h2>Modelling the connections</h2>
       <p>The graph contains 15 entities across six artifact types. Explicit relationships describe how a parameter configures software, how software implements a behaviour, and how tests verify requirements. Documentation is modelled as individual topics, so the results identify specific content to review.</p>
       <p>Relationship meaning and review policy are separate. For example, the stored relationship <strong>behaviour → implementedBy → module</strong> can be followed backwards and shown as <strong>module → implements → behaviour</strong>. Only approved relationship directions are followed.</p>
-      <figure><img src="/review-paths.svg" alt="Review paths from a configuration parameter through a software module, behaviour, requirement, and test, with documentation branches from the parameter and behaviour."><figcaption>Parameter-change review paths. Displayed labels describe traversal; stored relationships can point in the opposite direction.</figcaption></figure>
+      <figure><img src="review-paths.svg" alt="Review paths from a configuration parameter through a software module, behaviour, requirement, and test, with documentation branches from the parameter and behaviour."><figcaption>Parameter-change review paths. Displayed labels describe traversal; stored relationships can point in the opposite direction.</figcaption></figure>
       <h2>From proposed change to review plan</h2>
       <p>A reviewer selects a setting or behaviour, enters a proposal, and runs the analysis. The results separate engineering artifacts from documentation, with a review question and an expandable connection path for each candidate.</p>
       <p>Raising the brew target from <strong>93°C to 95°C</strong> returns four engineering artifacts and two documentation topics:</p>
@@ -59,9 +60,9 @@
       </ul>
       <p>The tool does not simulate physical outcomes or establish feasibility or safety. Real product data and review-time savings have not been evaluated. Findings are temporary and clear when the page refreshes or closes. Saving reviews, collaboration, requirement-change inputs, and integration with the separate alerts project are outside the current demo scope.</p>
       <h2>Try it</h2>
-      <p><a href="/">Open Impact Analyzer</a> to explore setting and behaviour changes. <a href="/case-study.md">Read the original case-study document</a> for the project narrative and source-document references.</p>
+      <p><a href="./">Open Impact Analyzer</a> to explore setting and behaviour changes. <a href="case-study.md">Read the original case-study document</a> for the project narrative and source-document references.</p>
     </article>
-    <footer><span>Designed and developed by Daniel Ng.</span><span class="footer-model">Synthetic demonstration model · <a href="/case-study.md">Coffee-machine model</a></span></footer>
+    <footer><span>Designed and developed by Daniel Ng.</span><span class="footer-model">Synthetic demonstration model · <a href="case-study.md">Coffee-machine model</a></span></footer>
   </main>
 </body>
 </html>

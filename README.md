@@ -69,6 +69,14 @@ python3 -m http.server 8000 --bind 127.0.0.1 --directory dist
 
 Python in this command is just an optional file server, not the analyzer.
 
+For GitHub Pages, open the repository's **Settings → Pages** and set **Source** to
+**GitHub Actions**. The workflow in `.github/workflows/pages.yml` checks the engines,
+builds `dist/`, and publishes it on pushes to `main` or when run manually from
+the **Actions** tab. Relative asset paths support the default repository address:
+`https://danielngkj.github.io/portfolio-impact-analyzer/`.
+After enabling Pages, run the workflow or push a commit, then link the resulting
+demo from the portfolio. A custom subdomain can be added later in Pages settings.
+
 For Vercel, import the GitHub repository and choose the **Other** framework preset.
 The checked-in `vercel.json` sets `sh scripts/build-static.sh` as the build command
 and `dist` as the output directory, with a route for `/case-study`. No Functions
