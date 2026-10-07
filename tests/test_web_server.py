@@ -8,6 +8,7 @@ from urllib.parse import urlencode
 
 from impact_analyzer import DATA_PATH, analyze, supported_scenarios
 from web_server import Handler
+from scripts.render_case_study import render_case_study
 
 
 class QuietHandler(Handler):
@@ -93,6 +94,10 @@ class WebTests(unittest.TestCase):
                 self.assertTrue(json.loads(body)["error"])
 
     def test_model_and_assets_are_served(self):
+        for path in ["/case-study", "/case-study/"]:
+            status, _, body = self.get(path)
+            self.assertEqual(status, 200)
+            self.assertEqual(body.decode(), render_case_study())
         status, _, body = self.get("/api/model")
         self.assertEqual(status, 200)
         self.assertEqual(json.loads(body), json.loads(DATA_PATH.read_text()))

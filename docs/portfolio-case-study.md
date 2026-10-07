@@ -140,12 +140,13 @@ The analyzer leaves the dataset unchanged and does not predict physical outcomes
 Automated tests compare the static browser engine against the Python reference:
 
 - **Python standard library:** graph validation, traversal, command-line
-  reporting, and a local server, without third-party dependencies.
+  reporting, and a local server. The case-study renderer uses Python-Markdown
+  to generate the webpage from this document and an HTML template.
 - **HTML, CSS, and JavaScript:** the browser loads the public JSON model and runs
   validation and traversal locally. Static hosting needs no Python or API service.
-- **26 automated tests:** cover review selection, explanations, API behaviour,
+- **29 automated tests:** cover review selection, explanations, API behaviour,
   and model integrity, including scenario metadata validation, exact pressure
-  candidates, shared-topic boundaries, and unchanged proposals. Browser-engine
+  candidates, shared-topic boundaries, unchanged proposals, and case-study generation. Browser-engine
   parity checks compare complete results, including ordered paths and questions,
   for suggested, custom, unchanged, and shared-module scenarios. A Safari walkthrough
   on 7 October 2026 checked status buttons, filters, note entry, report copying,

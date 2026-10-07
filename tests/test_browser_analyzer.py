@@ -132,8 +132,11 @@ class BrowserAnalyzerTests(unittest.TestCase):
             self.assertEqual((site / "data/coffee-machine.json").read_bytes(), DATA_PATH.read_bytes())
             self.assertEqual((site / "case-study.md").read_bytes(), (ROOT / "docs/portfolio-case-study.md").read_bytes())
             expected = {"index.html", "app.js", "analyzer.js", "style.css", "review-paths.svg", "case-study.md",
-                        "case-study/index.html", "data/coffee-machine.json"}
-            expected.update(f"icons/{path.name}" for path in (ROOT / "web/icons").glob("*.svg"))
+                        "case-study/index.html", "data/coffee-machine.json", "icons/LICENSE"}
+            expected.update(f"icons/{path.name}" for path in (ROOT / "docs/assets/lucide").glob("*.svg"))
+            self.assertEqual((site / "review-paths.svg").read_bytes(), (ROOT / "docs/assets/review-paths.svg").read_bytes())
+            for asset in (ROOT / "docs/assets/lucide").glob("*.svg"):
+                self.assertEqual((site / "icons" / asset.name).read_bytes(), asset.read_bytes())
             self.assertEqual({str(path.relative_to(site)) for path in site.rglob("*") if path.is_file()}, expected)
             index = (site / "index.html").read_text()
             self.assertLess(index.index('src="analyzer.js"'), index.index('src="app.js"'))
@@ -146,6 +149,8 @@ class BrowserAnalyzerTests(unittest.TestCase):
                         base = urljoin(base, declared_base[1])
                         markup = re.sub(r'<base[^>]+>', '', markup)
                     for target in re.findall(r'(?:href|src)="([^"]+)"', markup):
+                        if urlsplit(target).scheme:
+                            continue
                         path = urlsplit(urljoin(base, target)).path
                         self.assertTrue(path.startswith(prefix), target)
                         local = site / path[len(prefix):]

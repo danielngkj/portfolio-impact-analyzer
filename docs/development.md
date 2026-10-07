@@ -5,7 +5,16 @@ for model decisions, scenarios, and limitations.
 
 ## Local setup and CLI
 
-Start the local development server with Python 3.9 or later:
+Create a virtual environment and install the Markdown build dependency with
+Python 3.9 or later:
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements-build.txt
+```
+
+Activate the environment in each new terminal session. Start the local server:
 
 ```sh
 python3 web_server.py
@@ -22,8 +31,8 @@ python3 -m http.server 8000 --bind 127.0.0.1 --directory dist
 ```
 
 Rebuild after editing source files. The browser runs the analysis in JavaScript;
-Python serves the files for this local preview. Build and host the public site
-without a Python runtime.
+Python renders the case study during the build and serves files for this local
+preview. Public hosting needs no Python runtime.
 
 Run the Python reference engine from the command line:
 
@@ -43,13 +52,13 @@ Run the full test suite:
 python3 -m unittest discover -s tests -v
 ```
 
-The 26 tests cover graph validation, candidate selection, paths, unchanged
-proposals, local HTTP routes, and static build contents. Parity tests compare
+The 29 tests cover graph validation, candidate selection, paths, unchanged
+proposals, local HTTP routes, static build contents, and case-study generation. Parity tests compare
 JavaScript and Python results for suggested and custom proposals, duplicate edges,
 and shared-module boundaries. Update both engines when changing analysis rules.
 
 Use Python 3.9 or later and either Node or macOS’s built-in JavaScriptCore.
-The suite uses no third-party packages.
+Install `requirements-build.txt` before running the suite.
 
 ## Publish the static demo
 
@@ -74,11 +83,23 @@ root hosting and GitHub Pages’ repository subfolder. Serve `dist/`, not `web/`
 | `web/app.js`, `web/index.html`, `web/style.css` | Render the interface and manage findings and reports |
 | `impact_analyzer.py`, `web_server.py` | Provide the Python reference CLI and optional local server |
 | `scripts/build-static.sh` | Packages public assets |
+| `docs/assets/` | Stores the shared diagram, Lucide icons, and license |
+| `docs/portfolio-case-study.md`, `web/case-study.template.html` | Supply case-study content and page layout |
+| `scripts/render_case_study.py` | Converts the case study to HTML and resolves documentation links |
 | `tests/` | Check engines, parity, packaging, and HTTP routes |
 
 The optional local server exposes `/api/model`, `/api/scenarios`, and
 `/api/analyze?entity=PARAM-001&proposed=95` for reference checks. The static browser
 loads the JSON model and analyzes it locally.
+
+Edit `docs/portfolio-case-study.md` for case-study content and
+`web/case-study.template.html` for its layout. The build generates
+`dist/case-study/index.html` and copies the source to `dist/case-study.md`.
+The local development server uses the same renderer on each page request.
+Keep generated output out of Git. Documentation links in the generated page
+open the source guides on GitHub; the diagram uses a packaged local asset.
+Edit shared images in `docs/assets/`. The build copies the diagram and icons into
+`dist/`; the local server serves the same originals. Keep one source for each asset.
 
 ## Verification checklist
 

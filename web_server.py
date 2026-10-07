@@ -7,14 +7,13 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 from impact_analyzer import DATA_PATH, analyze, supported_scenarios, validate_graph
+from scripts.render_case_study import render_case_study
 
 WEB_ROOT = Path(__file__).parent / "web"
 ASSETS = {
     "/": ("index.html", "text/html; charset=utf-8"),
-    "/case-study": ("case-study.html", "text/html; charset=utf-8"),
-    "/case-study/": ("case-study.html", "text/html; charset=utf-8"),
     "/case-study.md": ("../docs/portfolio-case-study.md", "text/markdown; charset=utf-8"),
-    "/review-paths.svg": ("review-paths.svg", "image/svg+xml"),
+    "/review-paths.svg": ("../docs/assets/review-paths.svg", "image/svg+xml"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
     "/analyzer.js": ("analyzer.js", "text/javascript; charset=utf-8"),
     "/data/coffee-machine.json": ("../data/coffee-machine.json", "application/json; charset=utf-8"),
@@ -23,7 +22,8 @@ ASSETS = {
 
 # Explicit asset entries keep arbitrary filesystem paths inaccessible.
 for icon in ("sliders-horizontal", "code-xml", "activity", "list-checks", "flask-conical", "file-text"):
-    ASSETS[f"/icons/{icon}.svg"] = (f"icons/{icon}.svg", "image/svg+xml")
+    ASSETS[f"/icons/{icon}.svg"] = (f"../docs/assets/lucide/{icon}.svg", "image/svg+xml")
+ASSETS["/icons/LICENSE"] = ("../docs/assets/lucide/LICENSE", "text/plain; charset=utf-8")
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -39,6 +39,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         url = urlsplit(self.path)
+        if url.path in ("/case-study", "/case-study/"):
+            self.respond(200, render_case_study().encode("utf-8"), "text/html; charset=utf-8")
+            return
         if url.path in ASSETS:
             filename, content_type = ASSETS[url.path]
             self.respond(200, (WEB_ROOT / filename).read_bytes(), content_type)

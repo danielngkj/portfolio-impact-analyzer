@@ -4,6 +4,7 @@ Source: https://github.com/lucide-icons/lucide/tree/main/icons
 
 This folder preserves the original SVGs downloaded on 6 October 2026.
 The review-paths diagram embeds these icons without external requests.
+The browser and build also use these originals; the build copies them into `dist/icons/`.
 Read [LICENSE](LICENSE) for the upstream license and attribution.
 
 | Artifact | Icon |

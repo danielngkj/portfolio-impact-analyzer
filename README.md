@@ -24,6 +24,9 @@ needs no backend, database, or frontend framework.
 ## Try it locally
 
 ```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements-build.txt
 sh scripts/build-static.sh
 python3 -m http.server 8000 --bind 127.0.0.1 --directory dist
 ```
@@ -37,16 +40,19 @@ proposal, then choose **Find review candidates**. Stop the file server with Ctrl
 python3 -m unittest discover -s tests -v
 ```
 
-The 26 tests cover Python analysis, browser-engine parity, model validation,
+The 29 tests cover Python analysis, browser-engine parity, model validation,
 explanation paths, unchanged proposals, and local HTTP behaviour. Run them with
 Python 3.9 or later. JavaScript checks use Node or macOS’s built-in JavaScriptCore;
-the suite uses no third-party packages.
+and case-study generation uses the Markdown build dependency.
 
 ## Hosting
 
 The build packages the public files in `dist/` for static hosting. For GitHub
 Pages, select **Settings → Pages → Source → GitHub Actions**. The included
 workflow tests and publishes the site on pushes to `main`.
+
+Edit `docs/portfolio-case-study.md` to update the case study. The build generates
+its webpage from that document and an HTML template; hosting still serves static files.
 
 See the [deployment instructions](docs/development.md#publish-the-static-demo)
 for setup details.

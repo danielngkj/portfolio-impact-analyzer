@@ -24,7 +24,10 @@ jobs:
         with:
           python-version: '3.12'
       - name: Verify engines and local API
-        run: python3 -m unittest discover -s tests -v
+        # Markdown is a build dependency; the published site remains static.
+        run: |
+          python3 -m pip install -r requirements-build.txt
+          python3 -m unittest discover -s tests -v
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Package static site

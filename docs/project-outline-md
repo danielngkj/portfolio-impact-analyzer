@@ -9,7 +9,8 @@ types: parameters, modules, behaviours, requirements, tests, and documentation t
 The browser validates the model, selects review candidates, and explains each
 candidate with a relationship path. Reviewers record statuses and notes and copy
 a live report. The static app needs no backend. Python provides a reference CLI
-and optional local API; 26 tests check both engines, public assets, and HTTP routes.
+and optional local API; 29 tests check both engines, public assets, HTTP routes,
+and case-study generation.
 
 The bounded demo completes the ten phases below. Read the
 [case study](portfolio-case-study.md) for the outcome and limitations, or the
