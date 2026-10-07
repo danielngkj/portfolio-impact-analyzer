@@ -149,7 +149,7 @@ The static browser engine is checked against the Python reference:
   for suggested, custom, unchanged, and shared-module scenarios. A Safari walkthrough
   on 7 October 2026 checked status buttons, filters, note entry, report copying,
   visual paths, text comparison, preserved findings, and unchanged proposals. The
-  [README walkthrough](../README.md#test-the-scenarios-yourself) includes pressure
+  [scenario walkthrough](development.md#test-the-scenarios-yourself) includes pressure
   and comparison of the shared documentation paths.
 
 The [README](../README.md) provides run instructions and a test breakdown.
