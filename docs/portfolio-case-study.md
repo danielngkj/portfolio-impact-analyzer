@@ -137,24 +137,42 @@ The analyzer leaves the dataset unchanged and does not predict physical outcomes
 
 ## Implementation and validation
 
-Automated tests compare the static browser engine against the Python reference:
+The public demo is a static **HTML, CSS, and JavaScript** application. It loads
+the JSON model and runs graph validation and traversal in the browser. Public
+hosting needs no Python runtime or API service.
 
-- **Python standard library:** graph validation, traversal, command-line
-  reporting, and a local server. The case-study renderer uses Python-Markdown
-  to generate the webpage from this document and an HTML template.
-- **HTML, CSS, and JavaScript:** the browser loads the public JSON model and runs
-  validation and traversal locally. Static hosting needs no Python or API service.
-- **29 automated tests:** cover review selection, explanations, API behaviour,
-  and model integrity, including scenario metadata validation, exact pressure
-  candidates, shared-topic boundaries, unchanged proposals, and case-study generation. Browser-engine
-  parity checks compare complete results, including ordered paths and questions,
-  for suggested, custom, unchanged, and shared-module scenarios. A Safari walkthrough
-  on 7 October 2026 checked status buttons, filters, note entry, report copying,
-  visual paths, text comparison, preserved findings, and unchanged proposals. The
-  [verification checklist](development.md#verification-checklist) includes pressure
-  and comparison of the shared documentation paths.
+**Python provides a reference analysis engine**, a command-line tool, and an
+optional local HTTP server, using the standard library. At build time, a separate
+renderer uses Python-Markdown to generate this case-study webpage from its
+Markdown source and an HTML template.
 
-The [README](../README.md) provides run instructions and a test breakdown.
+The repository contains **29 automated tests**, all of which passed on
+15 October 2026:
+
+- **14 Python analysis tests:** check candidate selection, explanation paths,
+  model and proposal validation, unchanged proposals, traversal boundaries,
+  and preservation of the source model.
+- **5 JavaScript engine and static-build tests:** compare browser-engine results
+  with the Python reference for suggested, custom, unchanged, and
+  shared-module scenarios; check invalid inputs, script syntax, packaged assets,
+  and public links. Result comparisons include ordered paths and review questions.
+- **7 local HTTP-server tests:** check API results, scenario suggestions,
+  unchanged proposals, invalid requests, asset serving, and restricted routes.
+- **3 case-study rendering tests:** check source updates, formatting, links,
+  and the shared page header and footer.
+
+These tests verify selected software behaviours and consistency between the two
+engines. They do not establish real-world engineering accuracy or complete
+coverage. Automated JavaScript checks exercise the analysis engine and
+syntax-check the interface script; they do not automate browser interactions.
+
+Manual testing was recorded separately: a Safari walkthrough on 7 October 2026
+covered status buttons, filters, note entry, report copying, visual paths, text
+comparison, preserved findings, and unchanged proposals. The
+[verification checklist](development.md#verification-checklist) includes pressure
+and comparison of the shared documentation paths.
+
+The [README](../README.md) provides run instructions and the test command.
 
 ## Lessons and limits
 
